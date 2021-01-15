@@ -42,12 +42,16 @@ public class DriveSubsystem extends PIDSubsystem {
   private final WPI_TalonFX RIGHT_REAR_SLAVE = new WPI_TalonFX(Constants.REAR_RIGHT_MOTOR_PORT);
 
   private final double WHEEL_DIAMETER_METERS = 0.1524;
+  private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
   private final double GEAR_RATIO = 120 / 11;
   private final double TICKS_PER_METER = TICKS_PER_ROTATION * GEAR_RATIO * (1 / Math.PI * WHEEL_DIAMETER_METERS);
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER;
+  private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
+  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION;
+  private final double OPTIMAL_SLIP_RATIO = 0.05;
 
-  private final double MIN_TOLERANCE = 1.0;
+  private final double MIN_TOLERANCE = 0.125;
 
   private final AHRS NAVX = new AHRS(SPI.Port.kMXP);
 
@@ -95,13 +99,6 @@ public class DriveSubsystem extends PIDSubsystem {
       RIGHT_REAR_SLAVE.set(ControlMode.Follower, RIGHT_MASTER_MOTOR.getDeviceID());
 
       // Wait for Robot init before finishing DriveSubsystem init
-      /* Could do this instead
-      try {
-        Thread.sleep(7000);
-      } catch (Exception e) {
-        System.out.println("Exception is: " + e.toString());
-        e.printStackTrace();
-      } */
       try { Thread.sleep(7000); }
       catch (Exception e) { e.printStackTrace(); }
 
@@ -134,7 +131,23 @@ public class DriveSubsystem extends PIDSubsystem {
   @Override
   public void useOutput(double output, double setpoint) {
     // Use the output here
-    this.drivetrain.arcadeDrive(this.speed, -output);
+
+    // Apply basic traction control when going straight
+    if (!this.was_turning) {
+      // Get average linear wheel speeds
+      DifferentialDriveWheelSpeeds wheelSpeeds = this.getWheelSpeeds();
+      double averageWheelSpeed = Math.abs((wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2);
+      double inertialVelocity = this.getInertialVelocity();
+      double currentSlipRatio = (averageWheelSpeed - inertialVelocity) / inertialVelocity;
+
+      // If current slip ratio is greater than optimal then wheel is slipping excessively
+      if (currentSlipRatio >= OPTIMAL_SLIP_RATIO) {
+        // Set wheel speed proportionally to current inertial velocity plus a bit more to account for IMU noise
+        this.setSpeed(Math.copySign(((OPTIMAL_SLIP_RATIO * inertialVelocity) + inertialVelocity) / MAX_LINEAR_SPEED, this.speed));
+      } 
+    }
+
+    this.drivetrain.arcadeDrive(this.speed, -output, false);
   }
 
   @Override
@@ -180,12 +193,12 @@ public class DriveSubsystem extends PIDSubsystem {
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= this.deadband) {
       // Add delta to setpoint scaled by factor
-      this.setSetpoint(this.getController().getSetpoint() + (turn_request * this.turn_scalar));
+      this.setSetpoint(this.getMeasurement() + (turn_request * this.turn_scalar));
       this.was_turning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
       if (this.was_turning) {
-        this.setSetpoint(this.getAngle());
+        this.setSetpoint(this.getMeasurement());
         this.was_turning = false;
       }
     }
@@ -207,28 +220,24 @@ public class DriveSubsystem extends PIDSubsystem {
     //should be used for reversing the motors IN AUTOS ONLY
 
     //These reverse standard rotation of the motors, so in theory, they should move in reverse by swapping the negatives and positives of the master motor voltages
-    if(ReverseMotors == true){
+    if (ReverseMotors == true) {
       LEFT_MASTER_MOTOR.setVoltage(leftVolts);
       RIGHT_MASTER_MOTOR.setVoltage(-rightVolts);
       drivetrain.feed();
-    }
-
-    else{
+    } else {
       LEFT_MASTER_MOTOR.setVoltage(-leftVolts);
-    RIGHT_MASTER_MOTOR.setVoltage(rightVolts);
-    drivetrain.feed();
-    }
-
-    
+      RIGHT_MASTER_MOTOR.setVoltage(rightVolts);
+      drivetrain.feed();
+    }  
   }
   
-
   /**
    * Returns the current wheel speeds of the robot.
    * @return The current wheel speeds.
    */
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity(), RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity());
+    return new DifferentialDriveWheelSpeeds(LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity() * 10 * METERS_PER_TICK, 
+      RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity() * 10 * METERS_PER_TICK);
   }
 
   /**
@@ -270,6 +279,14 @@ public class DriveSubsystem extends PIDSubsystem {
    */
   public double getTurnRate() {
     return NAVX.getRate() * -1;
+  }
+
+  /**
+   * Returns inertial velocity of the robot.
+   * @return Velocity of the robot as measured by the NAVX
+   */
+  public double getInertialVelocity() {
+    return Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2));
   }
 
   /**

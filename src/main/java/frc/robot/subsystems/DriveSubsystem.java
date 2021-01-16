@@ -58,6 +58,7 @@ public class DriveSubsystem extends PIDSubsystem {
   private double speed = 0.0;
   private double turn_scalar = 1.0;
   private double deadband = 0.0; 
+  private double output = 0.0;
 
   private boolean was_turning = false;
 
@@ -76,9 +77,9 @@ public class DriveSubsystem extends PIDSubsystem {
    * @param turn_scalar Turn sensitivity
    * @param deadband Deadzone for joystick
    */
-  public DriveSubsystem(double kP, double kD, double period, double tolerance, double turn_scalar, double deadband) {
+  public DriveSubsystem(double kP, double kD, double tolerance, double turn_scalar, double deadband) {
       // The PIDController used by the subsystem
-      super(new PIDController(kP, 0, kD, period));
+      super(new PIDController(kP, 0, kD));
 
       // Set all drive motors to brake
       LEFT_MASTER_MOTOR.setNeutralMode(NeutralMode.Brake);
@@ -124,6 +125,7 @@ public class DriveSubsystem extends PIDSubsystem {
       if (Constants.DRIVE_DEBUG) {
         ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
         tab.addNumber("Drive Angle", () -> getAngle());
+        tab.addNumber("Drive PID Output", () -> this.output);
        
       }
   }
@@ -133,7 +135,7 @@ public class DriveSubsystem extends PIDSubsystem {
     // Use the output here
 
     // Apply basic traction control when going straight
-    if (!this.was_turning) {
+    if (!this.was_turning && false) {
       // Get average linear wheel speeds
       DifferentialDriveWheelSpeeds wheelSpeeds = this.getWheelSpeeds();
       double averageWheelSpeed = Math.abs((wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2);
@@ -158,6 +160,9 @@ public class DriveSubsystem extends PIDSubsystem {
 
   @Override
   public void periodic() {
+    if (this.isEnabled()) {
+      this.useOutput(this.getController().calculate(this.getMeasurement(), this.getSetpoint()), this.getSetpoint());
+    }
     // Update the odometry in the periodic block
     odometry.update(Rotation2d.fromDegrees(getHeading()), LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK,
                                                           RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK);
@@ -186,24 +191,24 @@ public class DriveSubsystem extends PIDSubsystem {
     speed = Math.copySign(Math.pow(speed, power), speed);
     turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
 
+    double measurement = this.getMeasurement();
+
     // Set drive speed if it is more than the deadband
     if (Math.abs(speed) >= this.deadband) this.setSpeed(speed);
     else this.stop();
-    
+
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= this.deadband) {
       // Add delta to setpoint scaled by factor
-      this.setSetpoint(this.getMeasurement() + (turn_request * this.turn_scalar));
+      this.setSetpoint(measurement + (turn_request * this.turn_scalar));
       this.was_turning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
       if (this.was_turning) {
-        this.setSetpoint(this.getMeasurement());
+        this.setSetpoint(measurement);
         this.was_turning = false;
       }
     }
-
-    drivetrain.feed();
   }
 
   /**

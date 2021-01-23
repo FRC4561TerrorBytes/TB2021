@@ -45,7 +45,7 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
   private final double GEAR_RATIO = 120 / 11;
-  private final double TICKS_PER_METER = TICKS_PER_ROTATION * GEAR_RATIO * (1 / Math.PI * WHEEL_DIAMETER_METERS);
+  private final double TICKS_PER_METER = TICKS_PER_ROTATION * GEAR_RATIO * (WHEEL_DIAMETER_METERS / Math.PI);
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER;
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION;
@@ -124,7 +124,7 @@ public class DriveSubsystem extends PIDSubsystem {
 
       if (Constants.DRIVE_DEBUG) {
         ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
-        tab.addNumber("Drive Angle", () -> getAngle());
+        tab.addNumber("Drive Angle", () -> getHeading());
         tab.addNumber("Drive PID Output", () -> this.output);
        
       }
@@ -164,8 +164,10 @@ public class DriveSubsystem extends PIDSubsystem {
       this.useOutput(this.getController().calculate(this.getMeasurement(), this.getSetpoint()), this.getSetpoint());
     }
     // Update the odometry in the periodic block
-    odometry.update(Rotation2d.fromDegrees(getHeading()), LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK,
+    odometry.update(Rotation2d.fromDegrees(this.getAngle()), LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK,
                                                           RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK);
+
+    System.out.println("Current position: " + odometry.getPoseMeters());
   }
 
   /**
@@ -252,7 +254,7 @@ public class DriveSubsystem extends PIDSubsystem {
   public void resetOdometry(Pose2d pose) {
     LEFT_MASTER_MOTOR.setSelectedSensorPosition(0);
     RIGHT_MASTER_MOTOR.setSelectedSensorPosition(0);
-    odometry.resetPosition(pose, Rotation2d.fromDegrees(getHeading()));
+    odometry.resetPosition(pose, Rotation2d.fromDegrees(this.getAngle()));
   }
 
   /**
@@ -268,7 +270,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return the robot's heading in degrees, from 180 to 180
    */
   public double getHeading() {
-    return Math.IEEEremainder(NAVX.getAngle(), 360) * -1;
+    return NAVX.getYaw();
   }
   
   /**
@@ -308,8 +310,8 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return the average of the two encoder readings
    */
   public double getAverageEncoderDistance() {
-    return ((LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK) + 
-      (LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK) / 2);
+    return (((LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK) + 
+      (LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK)) / 2);
   }
 
   /**
@@ -348,6 +350,17 @@ public class DriveSubsystem extends PIDSubsystem {
    */
   public void resetAngle() {
     NAVX.reset();
+  }
+
+  /**
+   * Invert Drive Motors
+   * @param invert set false for Teleop
+   */
+  public void invertMotors(boolean invert) {
+    LEFT_MASTER_MOTOR.setInverted(invert);
+    LEFT_REAR_SLAVE.setInverted(invert);
+    RIGHT_MASTER_MOTOR.setInverted(invert);
+    RIGHT_REAR_SLAVE.setInverted(invert);
   }
 
 }

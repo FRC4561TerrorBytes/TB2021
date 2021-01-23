@@ -22,7 +22,7 @@ public class TestReversePathWeaverAuto extends SequentialCommandGroup{
 
     super(
       //Drives Straight Forward
-      new AutoTrajectory(driveSubsystem, AutoModeConstants.DriveStraightTest.trajectoryJSON).getCommand(),
+      //new AutoTrajectory(driveSubsystem, AutoModeConstants.DriveStraightTest.trajectoryJSON).getCommand(),
       //Waits 1 second
       new WaitCommand(1),
       //Sets motor rotation to counterclockwise (reverse)

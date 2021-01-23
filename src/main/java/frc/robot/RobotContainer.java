@@ -29,8 +29,10 @@ import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
+import frc.robot.commands.automodes.PathARedAuto;
 import frc.robot.commands.automodes.ShootDriveStraightAuto;
 import frc.robot.commands.automodes.TestReversePathWeaverAuto;
+import frc.robot.commands.automodes.TrenchSixBallAuto;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.MagazineSubsystem;
@@ -98,6 +100,8 @@ public class RobotContainer {
     //Creates a dropdown box in the Driver Station with Auto Mode options to run during the autonomous period. See Robot for execution of chosen auto mode.
     chooser.setDefaultOption("ShootDriveForward", new ShootDriveStraightAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
     chooser.addOption("Reverse PathWeaver Test", new TestReversePathWeaverAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("PathA_Red", new PathARedAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Pls work", new TrenchSixBallAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
         //chooser.addOption("ShootDriveBack", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.ShootDriveBack.trajectoryJSON).getCommand());
     // chooser.addOption("SIX BALL BOIS", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.SixBallTrench.trajectoryJSON).getCommand());
     SmartDashboard.putData("Auto mode", chooser);

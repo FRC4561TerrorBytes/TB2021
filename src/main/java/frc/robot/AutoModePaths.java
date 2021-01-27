@@ -33,10 +33,21 @@ public class AutoModePaths {
     // 2021 FaH autos
     
     //UNTESTED
-    public static Pose2d[] PathA_RedOne = { new Pose2d(2, 0, Rotation2d.fromDegrees(90)) }; // 90
-    public static Pose2d[] PathA_RedTwo = { new Pose2d(2.5, -3, Rotation2d.fromDegrees(45)) }; // 1.5, -0.76, -25 //45
-    public static Pose2d[] PathA_RedThree = { new Pose2d(0.76, 2.286, Rotation2d.fromDegrees(0)) }; //90
-    public static Pose2d[] PathA_RedEnd = { new Pose2d(5, 0, Rotation2d.fromDegrees(-0)) }; //-70
+    public static Pose2d[] PathA_RedOne = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(2, 0, Rotation2d.fromDegrees(90)) 
+    }; // 90
+    public static Pose2d[] PathA_RedTwo = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(2.5, -3, Rotation2d.fromDegrees(45)) 
+    }; // 1.5, -0.76, -25 //45
+    public static Pose2d[] PathA_RedThree = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(0.76, 2.286, Rotation2d.fromDegrees(0)) }; //90
+    public static Pose2d[] PathA_RedEnd = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(5, 0, Rotation2d.fromDegrees(-0)) 
+    }; //-70
 
     
 

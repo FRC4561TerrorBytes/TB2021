@@ -31,12 +31,12 @@ public final class Constants {
     public static final double ROBOT_TICK_RATE = 1 / 60;
 
     // Drive PID values
-    public static final double DRIVE_kP = 0.040; //0.029
-    public static final double DRIVE_kD = 0.0003; //0.00035
-    public static final double DRIVE_PERIOD_SECONDS = 1 / 60;
-    public static final double DRIVE_TURN_SCALAR = 40.0;
-    public static final double DRIVE_TOLERANCE = 0.5;
-    public static final int DRIVE_RESPONSE_EXPONENT = 2;
+    public static final double DRIVE_kP = 0.018; //0.018
+    public static final double DRIVE_kD = 0.00029; //0.00029
+    public static final double DRIVE_PERIOD_SECONDS = 1 / 50;
+    public static final double DRIVE_TURN_SCALAR = 30.0;
+    public static final double DRIVE_TOLERANCE = 0.25;
+    public static final int DRIVE_RESPONSE_EXPONENT = 1;
 
     // Auto drive config values
     public static final double ANGLE_TOLERANCE = 15.0; // Degrees

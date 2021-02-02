@@ -167,7 +167,7 @@ public class DriveSubsystem extends PIDSubsystem {
     odometry.update(Rotation2d.fromDegrees(this.getAngle()), LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK,
                                                           RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK);
 
-    System.out.println("Current position: " + odometry.getPoseMeters());
+    //System.out.println("Current position: " + odometry.getPoseMeters());
   }
 
   /**
@@ -193,8 +193,6 @@ public class DriveSubsystem extends PIDSubsystem {
     speed = Math.copySign(Math.pow(speed, power), speed);
     turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
 
-    double measurement = this.getMeasurement();
-
     // Set drive speed if it is more than the deadband
     if (Math.abs(speed) >= this.deadband) this.setSpeed(speed);
     else this.stop();
@@ -202,12 +200,12 @@ public class DriveSubsystem extends PIDSubsystem {
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= this.deadband) {
       // Add delta to setpoint scaled by factor
-      this.setSetpoint(measurement + (turn_request * this.turn_scalar));
+      this.setSetpoint(this.getMeasurement() + (turn_request * this.turn_scalar));
       this.was_turning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
       if (this.was_turning) {
-        this.setSetpoint(measurement);
+        this.setSetpoint(this.getMeasurement());
         this.was_turning = false;
       }
     }
@@ -236,6 +234,14 @@ public class DriveSubsystem extends PIDSubsystem {
       RIGHT_MASTER_MOTOR.setVoltage(rightVolts);
       drivetrain.feed();
     }  
+  }
+
+  /**
+   * Sets maximum output of drivetrain
+   * @param maxOutput
+   */
+  public void setMaxOutput(double maxOutput) {
+    this.drivetrain.setMaxOutput(maxOutput);
   }
   
   /**
@@ -278,6 +284,14 @@ public class DriveSubsystem extends PIDSubsystem {
    */
   public void zeroHeading() {
     this.resetAngle();
+  }
+
+  /**
+   * Reset left and right drive
+   */
+  public void resetEncoders() {
+    LEFT_MASTER_MOTOR.getSensorCollection().setIntegratedSensorPosition(0, 0);
+    RIGHT_MASTER_MOTOR.getSensorCollection().setIntegratedSensorPosition(0, 0);
   }
 
   /**

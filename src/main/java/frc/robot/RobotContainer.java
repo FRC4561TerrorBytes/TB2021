@@ -86,7 +86,7 @@ public class RobotContainer {
     initializeCamera();
 
     // Enable PID on drive subsytem
-    DRIVE_SUBSYSTEM.enable();
+    //DRIVE_SUBSYSTEM.enable();
 
     // Set default commands for subsystems
     DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(LEFT_JOYSTICK.getY(), RIGHT_JOYSTICK.getX(), Constants.DRIVE_RESPONSE_EXPONENT), DRIVE_SUBSYSTEM));

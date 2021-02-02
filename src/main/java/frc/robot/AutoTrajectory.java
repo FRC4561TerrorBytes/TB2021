@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -43,8 +44,8 @@ public class AutoTrajectory {
   final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.140; //0.140
   final double kP = 2.6e-5; //2.6e-5
   final double kD = 2.21e-5; //2.21e-5
-  final double kRamseteB = 0.75;
-  final double kRamseteZeta = 0.0;
+  final double kRamseteB = 0.75; // 0.75
+  final double kRamseteZeta = 0.0; // 0.0
 
   DriveSubsystem subsystem;
   RamseteCommand ramseteCommand;
@@ -65,6 +66,7 @@ public class AutoTrajectory {
     try{
       Path pathweaverTrajectory = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
        this.jsonTrajectory = TrajectoryUtil.fromPathweaverJson(pathweaverTrajectory);
+       System.out.println("##########################################################################");
        System.out.println("Path: " + pathweaverTrajectory.toString());
     }
     catch(Exception e){
@@ -97,14 +99,22 @@ public class AutoTrajectory {
   public AutoTrajectory(DriveSubsystem subsystem, Pose2d[] waypoints, boolean isReversed) {
     this.subsystem = subsystem;
     
+    var autoVoltageConstraint = 
+      new DifferentialDriveVoltageConstraint(
+        new SimpleMotorFeedforward(this.VOLTS_kS,
+                                    this.VOLT_SECONDS_PER_METER_kV,
+                                    this.VOLT_SECONDS_SQUARD_PER_METER_kA),
+        this.DRIVE_KINEMATICS,
+      11);
     
     TrajectoryConfig config = new TrajectoryConfig(MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+    config.setKinematics(this.DRIVE_KINEMATICS);
+    config.addConstraint(autoVoltageConstraint);
     config.setReversed(isReversed);
     
     List<Pose2d> waypointList = new ArrayList<Pose2d>();
-    //waypointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+    waypointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     for(int i = 0; i < waypoints.length; i++) {
-      System.out.println(waypoints[i].getX() + " " + waypoints[i].getY() + " " + waypoints[i].getRotation());
       waypointList.add(waypoints[i]);
     }
 
@@ -112,12 +122,17 @@ public class AutoTrajectory {
     // roboto. Prevents robot from moving to first X,Y of trajectory and then following the path.
     // Changes the first point(s) of the trajectory to the X,Y point of where the robot currently is
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypointList, config);
+    // Trajectory trajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
+    //                                                                 List.of(
+    //                                                                   new Translation2d(1, 1),
+    //                                                                   new Translation2d(2, -1)
+    //                                                                 ),
+    //                                                                 new Pose2d(3, 0, new Rotation2d(0)),
+    //                                                                 config);
     Transform2d transform = subsystem.getPose().minus(trajectory.getInitialPose());
     Trajectory transformedTrajectory =  trajectory.transformBy(transform);
-    System.out.println("##########################################################################################");
-    System.out.println("Trajectory: " + trajectory.toString());
-    //Transform2d transform = subsystem.getPose().minus(trajectory.getInitialPose());
-    //Trajectory transformedTrajectory =  trajectory.transformBy(transform);
+    // System.out.println("##########################################################################################");
+    // System.out.println("Trajectory: " + trajectory.toString());
 
     // This is a method used to get the desired trajectory, put it into the command, have the command calculate the 
     // actual route relative to one plotted in Pathweaver, and then follow it the best it can, based on characterization given to it.
@@ -137,6 +152,8 @@ public class AutoTrajectory {
         subsystem::tankDriveVolts,
         subsystem 
     );
+
+    this.subsystem.resetOdometry(transformedTrajectory.getInitialPose());
   }
 
   /**

@@ -70,6 +70,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
 
     robotContainer.getDriveSubsystem().stop();
+    robotContainer.getDriveSubsystem().disable();
 
     // Reset Shooter Turret to front limit switch
     robotContainer.getShooterSubsystem().reset();
@@ -99,9 +100,10 @@ public class Robot extends TimedRobot {
     //Fail-safe to make sure that motors aren't still set to reversed from Autonomous
     new AutoMotorsReversed(false);
 
-    // Reset DriveSubsystem PID
+    // Reset and enable DriveSubsystem PID
     robotContainer.getDriveSubsystem().resetAngle();
     robotContainer.getDriveSubsystem().setSetpoint(0);
+    robotContainer.getDriveSubsystem().enable();
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to

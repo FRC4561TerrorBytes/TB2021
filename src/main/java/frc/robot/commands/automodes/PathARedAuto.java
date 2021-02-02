@@ -7,9 +7,6 @@
 
 package frc.robot.commands.automodes;
 
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.AutoModePaths;
 import frc.robot.AutoTrajectory;
@@ -24,9 +21,9 @@ public class PathARedAuto extends SequentialCommandGroup {
    */
   public PathARedAuto(DriveSubsystem driveSubsystem) {
     super(
-      new InstantCommand(() -> driveSubsystem.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))),
+      new AutoTrajectory(driveSubsystem, "output/Forward90.wpilib.json").getCommand()
       // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedOne, false).getCommand()
-      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedTwo, false).getCommand()
+      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedTwo, false).getCommand()
       // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedThree, false).getCommand(),
       // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedEnd, false).getCommand()
     );

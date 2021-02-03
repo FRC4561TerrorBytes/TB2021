@@ -15,11 +15,9 @@ import frc.robot.subsystems.DriveSubsystem;
 public class AutoMotorsReversed extends CommandBase {
   
 DriveSubsystem subsystem;
-boolean reversed;
  
-  public AutoMotorsReversed(boolean isReversed) {
+  public AutoMotorsReversed() {
     // Use addRequirements() here to declare subsystem dependencies.
-    reversed = isReversed;
   }
 
   // Called when the command is initially scheduled.
@@ -30,28 +28,16 @@ boolean reversed;
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(reversed == true) {
-      subsystem.ReverseMotors = true;
-  }
-  else{
-     subsystem.ReverseMotors = false;
-  }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-  //makes sure motors are set to normal if command ends / is interrupted. 
-    reversed = false;
-    subsystem.ReverseMotors = false;
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    //makes sure motors set to normal rotation when command finishes
-    reversed = false;
-    subsystem.ReverseMotors = false;
-    return false;
+    return true;
   }
 }

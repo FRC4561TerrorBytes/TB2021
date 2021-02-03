@@ -59,7 +59,6 @@ public class AutoTrajectory {
 
 
    // Contructor used to generate Trajectories from Pathweaver files instead of from a list of waypoints.
-   // The AutoMotorsReversed class will need to be called in a CommandGroup in each auto mode in order for any motors to reverse
   public AutoTrajectory(DriveSubsystem subsystem, String trajectoryJSON){
     this.subsystem = subsystem;
 
@@ -77,8 +76,7 @@ public class AutoTrajectory {
     Trajectory transformedTrajectory =  jsonTrajectory.transformBy(transform);
 
     this.ramseteCommand = new RamseteCommand(
-        transformedTrajectory,  // This had been changed to be the transformed trajecotry so that it calculates trajectory 
-                                // from final (transformed) trajectory
+        transformedTrajectory, 
         subsystem::getPose,
         new RamseteController(this.kRamseteB, this.kRamseteZeta),
         new SimpleMotorFeedforward(this.VOLTS_kS,
@@ -94,8 +92,7 @@ public class AutoTrajectory {
     );
 
   }
-  //The current AutoTrajectory constructor that is used. Kept here so working code doesn't need to be changed and the constructor above can be 
-  //removed if reversed/advanced autos using PathWeaver trajectories doesn't work or isn't more efficient.
+  //Generates trajectory from list of Pose[2d] with waypoints
   public AutoTrajectory(DriveSubsystem subsystem, Pose2d[] waypoints, boolean isReversed) {
     this.subsystem = subsystem;
     

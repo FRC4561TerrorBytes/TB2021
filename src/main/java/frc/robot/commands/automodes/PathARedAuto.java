@@ -21,11 +21,11 @@ public class PathARedAuto extends SequentialCommandGroup {
    */
   public PathARedAuto(DriveSubsystem driveSubsystem) {
     super(
-      new AutoTrajectory(driveSubsystem, "output/Forward90.wpilib.json").getCommand()
-      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedOne, false).getCommand()
-      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedTwo, false).getCommand()
-      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedThree, false).getCommand(),
-      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedEnd, false).getCommand()
+      //new AutoTrajectory(driveSubsystem, "output/Forward90.wpilib.json").getCommand()
+      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedOne, false).getCommand(),
+      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedTwo, false).getCommand(),
+      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedThree, false).getCommand(),
+      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedEnd, false).getCommand()
     );
   }
 }

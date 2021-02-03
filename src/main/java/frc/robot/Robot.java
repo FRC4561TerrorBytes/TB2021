@@ -10,7 +10,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.AutoMotorsReversed;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -98,8 +97,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     //Fail-safe to make sure that motors aren't still set to reversed from Autonomous
-    new AutoMotorsReversed(false);
-
     // Reset and enable DriveSubsystem PID
     robotContainer.getDriveSubsystem().resetAngle();
     robotContainer.getDriveSubsystem().setSetpoint(0);

@@ -21,14 +21,14 @@ public class TestReversePathWeaverAuto extends SequentialCommandGroup{
   public TestReversePathWeaverAuto(DriveSubsystem driveSubsystem) {
 
     super(
-      //Drives Straight Forward
-      //new AutoTrajectory(driveSubsystem, AutoModeConstants.DriveStraightTest.trajectoryJSON).getCommand(),
-      //Waits 1 second
-      new WaitCommand(1),
-      //Sets motor rotation to counterclockwise (reverse)
-      new AutoMotorsReversed(true),
-      //Follows the same path as before, but with motor rotation reversed, so should go in reverse straight backwards
-      new AutoTrajectory(driveSubsystem, AutoModePaths.ShootDriveStraight, false).getCommand()
+      // //Drives Straight Forward
+      // //new AutoTrajectory(driveSubsystem, AutoModeConstants.DriveStraightTest.trajectoryJSON).getCommand(),
+      // //Waits 1 second
+      // new WaitCommand(1),
+      // //Sets motor rotation to counterclockwise (reverse)
+      // new AutoMotorsReversed(true),
+      // //Follows the same path as before, but with motor rotation reversed, so should go in reverse straight backwards
+      // new AutoTrajectory(driveSubsystem, AutoModePaths.ShootDriveStraight, false).getCommand()
     );
 }
 }

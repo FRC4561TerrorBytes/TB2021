@@ -26,10 +26,6 @@ import frc.robot.Constants;
 
 
 public class DriveSubsystem extends PIDSubsystem {
-  
-  //FOR AUTOS ONLY: Sets motors to feed forward or backwards for advanced paths in Auto Mode ONLY
-  public boolean ReverseMotors;
-
 
   private String SUBSYSTEM_NAME = "Drive Subsystem";
 
@@ -220,20 +216,6 @@ public class DriveSubsystem extends PIDSubsystem {
     LEFT_MASTER_MOTOR.setVoltage(-leftVolts);
     RIGHT_MASTER_MOTOR.setVoltage(rightVolts);
     drivetrain.feed();
-    
-    //These two if statements determine whether the master motors rotate clockwise or counterclockwise based on whether the ReverseMotors boolean is true. This boolean 
-    //should be used for reversing the motors IN AUTOS ONLY
-
-    //These reverse standard rotation of the motors, so in theory, they should move in reverse by swapping the negatives and positives of the master motor voltages
-    if (ReverseMotors == true) {
-      LEFT_MASTER_MOTOR.setVoltage(leftVolts);
-      RIGHT_MASTER_MOTOR.setVoltage(-rightVolts);
-      drivetrain.feed();
-    } else {
-      LEFT_MASTER_MOTOR.setVoltage(-leftVolts);
-      RIGHT_MASTER_MOTOR.setVoltage(rightVolts);
-      drivetrain.feed();
-    }  
   }
 
   /**

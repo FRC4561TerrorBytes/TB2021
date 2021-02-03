@@ -6,13 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot.commands.automodes;
-
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.AutoModeConstants;
-import frc.robot.AutoModePaths;
-import frc.robot.AutoTrajectory;
-import frc.robot.commands.AutoMotorsReversed;
 import frc.robot.subsystems.DriveSubsystem;
 
 //A Test Auto Mode using PathWeaver Paths and While Going in Reverse.

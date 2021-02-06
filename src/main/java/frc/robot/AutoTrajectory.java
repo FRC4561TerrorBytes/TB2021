@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Transform2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
@@ -42,13 +42,20 @@ public class AutoTrajectory {
   final double VOLTS_kS = 0.240; //0.240
   final double VOLT_SECONDS_PER_METER_kV = 2.38; //2.39
   final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.140; //0.140
-  final double kP = 2.6e-5; //2.6e-5
-  final double kD = 2.21e-5; //2.21e-5
-  final double kRamseteB = 0.75; // 0.75
-  final double kRamseteZeta = 0.0; // 0.0
+  final double kP = 0; //2.6e-5
+  final double kD = 0; //2.21e-5
+  final double kRamseteB = 1.0; // 0.75 // 1.0
+  final double kRamseteZeta = 0.15; // 0.0 // 0.15
 
   DriveSubsystem subsystem;
   RamseteCommand ramseteCommand;
+  RamseteController disabledRamsete= new RamseteController() {
+    @Override
+    public ChassisSpeeds calculate(Pose2d currentPose, Pose2d poseRef, double linearVelocityMeters,
+      double angularVelocityRefRadiansPerSecond) {
+        return new ChassisSpeeds(linearVelocityMeters, 0.0, angularVelocityRefRadiansPerSecond);
+      }
+  };
   Trajectory jsonTrajectory;
   
   /**
@@ -118,18 +125,10 @@ public class AutoTrajectory {
     // This transforms the starting position of the trajectory to match the starting position of the actual 
     // roboto. Prevents robot from moving to first X,Y of trajectory and then following the path.
     // Changes the first point(s) of the trajectory to the X,Y point of where the robot currently is
+    subsystem.resetOdometry();
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypointList, config);
-    // Trajectory trajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
-    //                                                                 List.of(
-    //                                                                   new Translation2d(1, 1),
-    //                                                                   new Translation2d(2, -1)
-    //                                                                 ),
-    //                                                                 new Pose2d(3, 0, new Rotation2d(0)),
-    //                                                                 config);
     Transform2d transform = subsystem.getPose().minus(trajectory.getInitialPose());
     Trajectory transformedTrajectory =  trajectory.transformBy(transform);
-    // System.out.println("##########################################################################################");
-    // System.out.println("Trajectory: " + trajectory.toString());
 
     // This is a method used to get the desired trajectory, put it into the command, have the command calculate the 
     // actual route relative to one plotted in Pathweaver, and then follow it the best it can, based on characterization given to it.
@@ -137,7 +136,7 @@ public class AutoTrajectory {
         transformedTrajectory,  // This had been changed to be the transformed trajecotry so that it calculates trajectory 
                                 // from final (transformed) trajectory
         subsystem::getPose,
-        new RamseteController(this.kRamseteB, this.kRamseteZeta),
+        disabledRamsete,
         new SimpleMotorFeedforward(this.VOLTS_kS,
                                   this.VOLT_SECONDS_PER_METER_kV,
                                   this.VOLT_SECONDS_SQUARD_PER_METER_kA),
@@ -149,8 +148,6 @@ public class AutoTrajectory {
         subsystem::tankDriveVolts,
         subsystem 
     );
-
-    this.subsystem.resetOdometry(transformedTrajectory.getInitialPose());
   }
 
   /**

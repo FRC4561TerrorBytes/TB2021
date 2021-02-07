@@ -88,13 +88,5 @@ public class ClimberSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
-    if (Math.abs(RobotContainer.XBOX_CONTROLLER.getY(Hand.kLeft)) > Constants.DEADBAND) {
-      CLIMBER_HOOK_MOTOR.set(RobotContainer.XBOX_CONTROLLER.getY(Hand.kLeft));
-    }
-    if (Math.abs(RobotContainer.XBOX_CONTROLLER.getY(Hand.kRight)) > Constants.DEADBAND) {
-      CLIMBER_LIFT_MOTOR.set(RobotContainer.XBOX_CONTROLLER.getY(Hand.kRight));
-    
-    }
   }
 }

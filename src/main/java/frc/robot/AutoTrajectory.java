@@ -37,19 +37,19 @@ public class AutoTrajectory {
   // Ramsete Command values
   final double MAX_VELOCITY_METERS_PER_SECOND = 3.75;
   final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.75;
-  final double TRACK_WIDTH = 0.53975; //0.53975
+  final double TRACK_WIDTH = 0.53975;
   final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(TRACK_WIDTH);
-  final double VOLTS_kS = 0.240; //0.240
-  final double VOLT_SECONDS_PER_METER_kV = 2.38; //2.39
-  final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.140; //0.140
+  final double VOLTS_kS = 0.240;
+  final double VOLT_SECONDS_PER_METER_kV = 2.38;
+  final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.140;
   final double kP = 0; //2.6e-5
   final double kD = 0; //2.21e-5
-  final double kRamseteB = 1.0; // 0.75 // 1.0
-  final double kRamseteZeta = 0.15; // 0.0 // 0.15
+  final double kRamseteB = 1.0; // 0.75
+  final double kRamseteZeta = 0.15; // 0.0
 
   DriveSubsystem subsystem;
   RamseteCommand ramseteCommand;
-  RamseteController disabledRamsete= new RamseteController() {
+  RamseteController disabledRamsete = new RamseteController() {
     @Override
     public ChassisSpeeds calculate(Pose2d currentPose, Pose2d poseRef, double linearVelocityMeters,
       double angularVelocityRefRadiansPerSecond) {
@@ -85,10 +85,10 @@ public class AutoTrajectory {
     this.ramseteCommand = new RamseteCommand(
         transformedTrajectory, 
         subsystem::getPose,
-        new RamseteController(this.kRamseteB, this.kRamseteZeta),
+        disabledRamsete,
         new SimpleMotorFeedforward(this.VOLTS_kS,
-                                  this.VOLT_SECONDS_PER_METER_kV,
-                                  this.VOLT_SECONDS_SQUARD_PER_METER_kA),
+                                    this.VOLT_SECONDS_PER_METER_kV,
+                                    this.VOLT_SECONDS_SQUARD_PER_METER_kA),
         this.DRIVE_KINEMATICS,
         subsystem::getWheelSpeeds,
         new PIDController(this.kP, 0, this.kD),
@@ -138,8 +138,8 @@ public class AutoTrajectory {
         subsystem::getPose,
         disabledRamsete,
         new SimpleMotorFeedforward(this.VOLTS_kS,
-                                  this.VOLT_SECONDS_PER_METER_kV,
-                                  this.VOLT_SECONDS_SQUARD_PER_METER_kA),
+                                    this.VOLT_SECONDS_PER_METER_kV,
+                                    this.VOLT_SECONDS_SQUARD_PER_METER_kA),
         this.DRIVE_KINEMATICS,
         subsystem::getWheelSpeeds,
         new PIDController(this.kP, 0, this.kD),

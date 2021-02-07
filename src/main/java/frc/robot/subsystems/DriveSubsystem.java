@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Twist2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -33,7 +32,7 @@ public class DriveSubsystem extends PIDSubsystem {
 
   private DifferentialDrive drivetrain;
 
-  public final WPI_TalonFX LEFT_MASTER_MOTOR = new WPI_TalonFX(Constants.FRONT_LEFT_MOTOR_PORT);
+  private final WPI_TalonFX LEFT_MASTER_MOTOR = new WPI_TalonFX(Constants.FRONT_LEFT_MOTOR_PORT);
   private final WPI_TalonFX LEFT_REAR_SLAVE = new WPI_TalonFX(Constants.REAR_LEFT_MOTOR_PORT);
 
   private final WPI_TalonFX RIGHT_MASTER_MOTOR = new WPI_TalonFX(Constants.FRONT_RIGHT_MOTOR_PORT);
@@ -44,9 +43,10 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double TICKS_PER_ROTATION = 2048;
   private final double GEAR_RATIO = 10.90909090; // 120 / 11
   private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(WHEEL_DIAMETER_METERS * Math.PI);
-  public final double METERS_PER_TICK = 1 / TICKS_PER_METER;
+  private final double METERS_PER_TICK = 1 / TICKS_PER_METER;
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
-  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION;
+  private final double DRIVETRAIN_EFFICIENCY = 0.85;
+  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.03;
 
   private final double MIN_TOLERANCE = 0.125;
@@ -57,10 +57,6 @@ public class DriveSubsystem extends PIDSubsystem {
   private double turn_scalar = 1.0;
   private double deadband = 0.0; 
   private double output = 0.0;
-
-  private Pose2d poseMeters;
-  private Rotation2d prevAngle;
-  private double prevLeftDistance, prevRightDistance;
 
   private boolean was_turning = false;
 
@@ -83,6 +79,10 @@ public class DriveSubsystem extends PIDSubsystem {
       // The PIDController used by the subsystem
       super(new PIDController(kP, 0, kD));
 
+      // Reset master TalonFX settings
+      LEFT_MASTER_MOTOR.configFactoryDefault();
+      RIGHT_MASTER_MOTOR.configFactoryDefault();
+
       // Set all drive motors to brake
       LEFT_MASTER_MOTOR.setNeutralMode(NeutralMode.Brake);
       LEFT_REAR_SLAVE.setNeutralMode(NeutralMode.Brake);
@@ -95,27 +95,25 @@ public class DriveSubsystem extends PIDSubsystem {
       RIGHT_MASTER_MOTOR.setInverted(false);
       RIGHT_REAR_SLAVE.setInverted(false);
 
-      // Make mid and rear left motor controllers follow left master
+      // Make rear left motor controllers follow left master
       LEFT_REAR_SLAVE.set(ControlMode.Follower, LEFT_MASTER_MOTOR.getDeviceID());
 
-      // Make mid and rear right motor controllers follow right master
+      // Make rear right motor controllers follow right master
       RIGHT_REAR_SLAVE.set(ControlMode.Follower, RIGHT_MASTER_MOTOR.getDeviceID());
 
       // Make motors use integrated encoder
-      LEFT_MASTER_MOTOR.configFactoryDefault();
-      RIGHT_MASTER_MOTOR.configFactoryDefault();
       LEFT_MASTER_MOTOR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
       RIGHT_MASTER_MOTOR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
-      // Wait for Robot init before finishing DriveSubsystem init
-      try { Thread.sleep(7000); }
+      // Wait for NAVX init before finishing DriveSubsystem init
+      try { Thread.sleep(3000); }
       catch (Exception e) { e.printStackTrace(); }
 
       // Initialise PID subsystem setpoint and input
       this.resetAngle();
       this.setSetpoint(0);
 
-      // Set drive PID tolerance, minimum is 1 degree
+      // Set drive PID tolerance, minimum is 0.125 degree
       if (tolerance < this.MIN_TOLERANCE) tolerance = this.MIN_TOLERANCE;
       this.getController().setTolerance(tolerance);
 
@@ -135,7 +133,6 @@ public class DriveSubsystem extends PIDSubsystem {
         ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
         tab.addNumber("Drive Angle", () -> getHeading());
         tab.addNumber("Drive PID Output", () -> this.output);
-       
       }
   }
 
@@ -152,10 +149,12 @@ public class DriveSubsystem extends PIDSubsystem {
       double currentSlipRatio = (averageWheelSpeed - inertialVelocity) / inertialVelocity;
 
       // If current slip ratio is greater than optimal then wheel is slipping excessively
-      if (currentSlipRatio >= OPTIMAL_SLIP_RATIO) {
+      if (currentSlipRatio >= this.OPTIMAL_SLIP_RATIO) {
         // Set wheel speed proportionally to current inertial velocity plus a bit more to account for IMU noise
-        this.setSpeed(Math.copySign(((OPTIMAL_SLIP_RATIO * inertialVelocity) + inertialVelocity) / MAX_LINEAR_SPEED
-                                      + (OPTIMAL_SLIP_RATIO * this.speed), this.speed));
+        this.setSpeed(Math.copySign((inertialVelocity != 0) ? ((this.OPTIMAL_SLIP_RATIO * inertialVelocity) + inertialVelocity) / this.MAX_LINEAR_SPEED
+                                                              : (this.OPTIMAL_SLIP_RATIO * this.speed),
+                                    this.speed)
+        );
       }
     }
 
@@ -175,37 +174,8 @@ public class DriveSubsystem extends PIDSubsystem {
     }
     // Update the odometry in the periodic block
     // Negate gyro angle because gyro is positive going clockwise which doesn't match WPILib convention
-    odometry.update(Rotation2d.fromDegrees(-this.getAngle()), LEFT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK,
+    this.odometry.update(Rotation2d.fromDegrees(-this.getAngle()), LEFT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK,
                                                           RIGHT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK);
-  }
-
-  /**
-   * Updates the robot position on the field using distance measurements from encoders. This method
-   * is more numerically accurate than using velocities to integrate the pose and is also
-   * advantageous for teams that are using lower CPR encoders.
-   *
-   * @param gyroAngle The angle reported by the gyroscope.
-   * @param leftDistanceMeters The distance traveled by the left encoder.
-   * @param rightDistanceMeters The distance traveled by the right encoder.
-   * @return The new pose of the robot.
-   */
-  public Pose2d updatePose(Rotation2d gyroAngle, double leftDistanceMeters, double rightDistanceMeters) {
-    double deltaLeftDistance = leftDistanceMeters - this.prevLeftDistance;
-    double deltaRightDistance = rightDistanceMeters - this.prevRightDistance;
-
-    this.prevLeftDistance = leftDistanceMeters;
-    this.prevRightDistance = rightDistanceMeters;
-
-    double averageDeltaDistance = (deltaLeftDistance + deltaRightDistance) / 2.0;
-
-    Pose2d newPose =
-        poseMeters.exp(
-            new Twist2d(averageDeltaDistance, 0.0, gyroAngle.minus(this.prevAngle).getRadians()));
-
-    this.prevAngle = gyroAngle;
-
-    this.poseMeters = new Pose2d(newPose.getTranslation(), gyroAngle);
-    return this.poseMeters;
   }
 
   /**
@@ -295,7 +265,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return The pose
    */
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return this.odometry.getPoseMeters();
   }
 
   /**
@@ -303,7 +273,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return the robot's heading in degrees, from 180 to 180
    */
   public double getHeading() {
-    return NAVX.getYaw();
+    return this.NAVX.getYaw();
   }
   
   /**
@@ -334,7 +304,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return Velocity of the robot as measured by the NAVX
    */
   public double getInertialVelocity() {
-    return Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2));
+    return (NAVX.isMoving()) ? Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)) : 0;
   }
 
   /**

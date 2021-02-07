@@ -44,7 +44,7 @@ public final class Constants {
     public static final double AUTO_STOPPING_DISTANCE = 0.0; // Inches
     public static final double AUTO_SPEED = 0.0; // [0, 1]
     public static final double TURN_DAMPER = 0.1; // [0, 1]
-	public static final double TURRET_TURN_DAMPER = 0.15; // [0, 1]
+		public static final double TURRET_TURN_DAMPER = 0.15; // [0, 1]
 
     // Intake Arm PID config
     private static final double ARM_kP = 0.9;

@@ -146,15 +146,17 @@ public class DriveSubsystem extends PIDSubsystem {
       DifferentialDriveWheelSpeeds wheelSpeeds = this.getWheelSpeeds();
       double averageWheelSpeed = Math.abs((wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2);
       double inertialVelocity = this.getInertialVelocity();
-      double currentSlipRatio = (averageWheelSpeed - inertialVelocity) / inertialVelocity;
+      double currentSlipRatio = (averageWheelSpeed > inertialVelocity) ?
+																(averageWheelSpeed - inertialVelocity) / averageWheelSpeed :
+																(inertialVelocity - averageWheelSpeed) / inertialVelocity;
 
       // If current slip ratio is greater than optimal then wheel is slipping excessively
       if (currentSlipRatio >= this.OPTIMAL_SLIP_RATIO) {
-        // Set wheel speed proportionally to current inertial velocity plus a bit more to account for IMU noise
-        this.setSpeed(Math.copySign((inertialVelocity != 0) ? ((this.OPTIMAL_SLIP_RATIO * inertialVelocity) + inertialVelocity) / this.MAX_LINEAR_SPEED
-                                                              : (this.OPTIMAL_SLIP_RATIO * this.speed),
-                                    this.speed)
-        );
+				// Calculate optimal speed based on optimal slip ratio
+				double optimalSpeed = (inertialVelocity != 0) ? 
+															(-inertialVelocity / (this.OPTIMAL_SLIP_RATIO - 1)) / this.MAX_LINEAR_SPEED : 
+															(this.OPTIMAL_SLIP_RATIO * this.speed);
+        this.setSpeed(Math.copySign(optimalSpeed, this.speed));
       }
     }
 

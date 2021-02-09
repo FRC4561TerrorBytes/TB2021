@@ -47,7 +47,7 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
   private final double DRIVETRAIN_EFFICIENCY = 0.85;
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
-  private final double OPTIMAL_SLIP_RATIO = 0.05;
+  private final double OPTIMAL_SLIP_RATIO = 0.03;
 
   private final double MIN_TOLERANCE = 0.125;
 
@@ -151,7 +151,10 @@ public class DriveSubsystem extends PIDSubsystem {
       // If current slip ratio is greater than optimal then wheel is slipping excessively
       if (currentSlipRatio >= this.OPTIMAL_SLIP_RATIO) {
         // Set wheel speed proportionally to current inertial velocity plus a bit more to account for IMU noise
-        this.setSpeed(Math.copySign((inertialVelocity / this.MAX_LINEAR_SPEED) + this.OPTIMAL_SLIP_RATIO, this.speed));
+        this.setSpeed(Math.copySign((inertialVelocity != 0) ? ((this.OPTIMAL_SLIP_RATIO * inertialVelocity) + inertialVelocity) / this.MAX_LINEAR_SPEED
+                                                              : (this.OPTIMAL_SLIP_RATIO * this.speed),
+                                    this.speed)
+        );
       }
     }
 

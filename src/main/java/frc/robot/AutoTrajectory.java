@@ -42,8 +42,8 @@ public class AutoTrajectory {
   final double VOLTS_kS = 0.240;
   final double VOLT_SECONDS_PER_METER_kV = 2.38;
   final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.140;
-  final double kP = 0; //2.6e-5
-  final double kD = 0; //2.21e-5
+  final double kP = 2.6e-5; //2.6e-5
+  final double kD = 2.21e-5; //2.21e-5
   final double kRamseteB = 1.0; // 0.75
   final double kRamseteZeta = 0.15; // 0.0
 

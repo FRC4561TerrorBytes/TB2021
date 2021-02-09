@@ -148,7 +148,7 @@ public class DriveSubsystem extends PIDSubsystem {
       double inertialVelocity = this.getInertialVelocity();
       double currentSlipRatio = (averageWheelSpeed > inertialVelocity) ?
 																(averageWheelSpeed - inertialVelocity) / averageWheelSpeed :
-																(inertialVelocity - averageWheelSpeed) / inertialVelocity;
+																0;
 
       // If current slip ratio is greater than optimal then wheel is slipping excessively
       if (currentSlipRatio >= this.OPTIMAL_SLIP_RATIO) {

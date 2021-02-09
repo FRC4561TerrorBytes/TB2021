@@ -57,7 +57,7 @@ public class RobotContainer {
       Constants.HOOD_CONFIG, Constants.TURRET_CONFIG);
 
 
-  public static final XboxController XBOX_CONTROLLER = new XboxController(Constants.XBOX_CONTROLLER_PORT);
+  private static final XboxController XBOX_CONTROLLER = new XboxController(Constants.XBOX_CONTROLLER_PORT);
 
 
   private static final Joystick LEFT_JOYSTICK = new Joystick(Constants.LEFT_JOYSTICK_PORT);
@@ -68,8 +68,8 @@ public class RobotContainer {
   public static UsbCamera camera2;
 
 
-//  private static SendableChooser<Command> chooser = new SendableChooser<>();
- private static SendableChooser<SequentialCommandGroup> chooser = new SendableChooser<>(); //TODO:Test execution of autos with the chooser
+  //  private static SendableChooser<Command> chooser = new SendableChooser<>();
+  private static SendableChooser<SequentialCommandGroup> chooser = new SendableChooser<>();
 
 
   private final boolean TURRET_SETPOINT_VISION_INTERRUPT = false;
@@ -84,9 +84,6 @@ public class RobotContainer {
 
     // Start streaming driver camera
     initializeCamera();
-
-    // Enable PID on drive subsytem
-    //DRIVE_SUBSYSTEM.enable();
 
     // Set default commands for subsystems
     DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(LEFT_JOYSTICK.getY(), RIGHT_JOYSTICK.getX(), Constants.DRIVE_RESPONSE_EXPONENT), DRIVE_SUBSYSTEM));
@@ -212,7 +209,6 @@ public class RobotContainer {
       
   }
 
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot class.
    *
@@ -222,8 +218,6 @@ public class RobotContainer {
     //Sets the autonomous command to be executed to the Auto Mode chosen from the Driver Station
     return chooser.getSelected(); //TODO: Test SendableChooser
   }
-
- 
 
   /**
    * Get DriveSubsystem

@@ -33,13 +33,16 @@ public class AutoModePaths {
     // 2021 FaH autos
     
     //UNTESTED
-    public static Pose2d[] PathA_RedOne = { 
-        new Pose2d(1, 1, Rotation2d.fromDegrees(0)),
-        new Pose2d(1, 0, Rotation2d.fromDegrees(90)) 
-    }; // 90
-    public static Pose2d[] PathA_RedTwo = { new Pose2d(2.5, -3, Rotation2d.fromDegrees(0)) }; // 1.5, -0.76, -25 //45
-    public static Pose2d[] PathA_RedThree = { new Pose2d(0.76, 2.286, Rotation2d.fromDegrees(0)) }; //90
-    public static Pose2d[] PathA_RedEnd = { new Pose2d(5, 0, Rotation2d.fromDegrees(-0)) }; //-70
+    public static Pose2d[] PathA_RedAll = {
+        new Pose2d(2, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(3.5, -0.76, Rotation2d.fromDegrees(-20)),
+        new Pose2d(4.26, 0.526, Rotation2d.fromDegrees(90)),
+        new Pose2d(7.26, 0.526, Rotation2d.fromDegrees(-70))
+    };
+    public static Pose2d[] PathA_RedOne = { new Pose2d(2, 0, Rotation2d.fromDegrees(0)) }; // 90
+    public static Pose2d[] PathA_RedTwo = { new Pose2d(1.5, -0.76, Rotation2d.fromDegrees(-20)) }; // 1.5, -0.76, -25 //45
+    public static Pose2d[] PathA_RedThree = { new Pose2d(0.76, 1.286, Rotation2d.fromDegrees(90)) }; //0.76, 2.286, 90
+    public static Pose2d[] PathA_RedEnd = { new Pose2d(3, 0, Rotation2d.fromDegrees(-70)) }; //5, 0, -70
 }
 
 

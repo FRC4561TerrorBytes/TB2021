@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
@@ -40,11 +41,12 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double WHEEL_DIAMETER_METERS = 0.1524;
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
-  private final double GEAR_RATIO = 120 / 11;
-  private final double TICKS_PER_METER = TICKS_PER_ROTATION * GEAR_RATIO * (WHEEL_DIAMETER_METERS / Math.PI);
+  private final double GEAR_RATIO = 10.90909090; // 120 / 11
+  private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(WHEEL_DIAMETER_METERS * Math.PI);
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER;
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
-  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION;
+  private final double DRIVETRAIN_EFFICIENCY = 0.85;
+  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.05;
 
   private final double MIN_TOLERANCE = 0.125;
@@ -77,6 +79,10 @@ public class DriveSubsystem extends PIDSubsystem {
       // The PIDController used by the subsystem
       super(new PIDController(kP, 0, kD));
 
+      // Reset master TalonFX settings
+      LEFT_MASTER_MOTOR.configFactoryDefault();
+      RIGHT_MASTER_MOTOR.configFactoryDefault();
+
       // Set all drive motors to brake
       LEFT_MASTER_MOTOR.setNeutralMode(NeutralMode.Brake);
       LEFT_REAR_SLAVE.setNeutralMode(NeutralMode.Brake);
@@ -89,21 +95,25 @@ public class DriveSubsystem extends PIDSubsystem {
       RIGHT_MASTER_MOTOR.setInverted(false);
       RIGHT_REAR_SLAVE.setInverted(false);
 
-      // Make mid and rear left motor controllers follow left master
+      // Make rear left motor controllers follow left master
       LEFT_REAR_SLAVE.set(ControlMode.Follower, LEFT_MASTER_MOTOR.getDeviceID());
 
-      // Make mid and rear right motor controllers follow right master
+      // Make rear right motor controllers follow right master
       RIGHT_REAR_SLAVE.set(ControlMode.Follower, RIGHT_MASTER_MOTOR.getDeviceID());
 
-      // Wait for Robot init before finishing DriveSubsystem init
-      try { Thread.sleep(7000); }
+      // Make motors use integrated encoder
+      LEFT_MASTER_MOTOR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+      RIGHT_MASTER_MOTOR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
+      // Wait for NAVX init before finishing DriveSubsystem init
+      try { Thread.sleep(3000); }
       catch (Exception e) { e.printStackTrace(); }
 
       // Initialise PID subsystem setpoint and input
       this.resetAngle();
       this.setSetpoint(0);
 
-      // Set drive PID tolerance, minimum is 1 degree
+      // Set drive PID tolerance, minimum is 0.125 degree
       if (tolerance < this.MIN_TOLERANCE) tolerance = this.MIN_TOLERANCE;
       this.getController().setTolerance(tolerance);
 
@@ -113,7 +123,8 @@ public class DriveSubsystem extends PIDSubsystem {
       // Disable built in deadband application
       this.drivetrain.setDeadband(0);
 
-      this.odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+      this.odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0));
+      this.resetOdometry();
 
       this.turn_scalar = turn_scalar;
       this.deadband = deadband;
@@ -122,7 +133,6 @@ public class DriveSubsystem extends PIDSubsystem {
         ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
         tab.addNumber("Drive Angle", () -> getHeading());
         tab.addNumber("Drive PID Output", () -> this.output);
-       
       }
   }
 
@@ -131,18 +141,23 @@ public class DriveSubsystem extends PIDSubsystem {
     // Use the output here
 
     // Apply basic traction control when going straight
-    if (!this.was_turning && false) {
+    if (!this.was_turning) {
       // Get average linear wheel speeds
       DifferentialDriveWheelSpeeds wheelSpeeds = this.getWheelSpeeds();
       double averageWheelSpeed = Math.abs((wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2);
       double inertialVelocity = this.getInertialVelocity();
-      double currentSlipRatio = (averageWheelSpeed - inertialVelocity) / inertialVelocity;
+      double currentSlipRatio = (averageWheelSpeed > inertialVelocity) ?
+																(averageWheelSpeed - inertialVelocity) / averageWheelSpeed :
+																0;
 
       // If current slip ratio is greater than optimal then wheel is slipping excessively
-      if (currentSlipRatio >= OPTIMAL_SLIP_RATIO) {
-        // Set wheel speed proportionally to current inertial velocity plus a bit more to account for IMU noise
-        this.setSpeed(Math.copySign(((OPTIMAL_SLIP_RATIO * inertialVelocity) + inertialVelocity) / MAX_LINEAR_SPEED, this.speed));
-      } 
+      if (currentSlipRatio >= this.OPTIMAL_SLIP_RATIO) {
+				// Calculate optimal speed based on optimal slip ratio
+				double optimalSpeed = (inertialVelocity != 0) ? 
+															(-inertialVelocity / (this.OPTIMAL_SLIP_RATIO - 1)) / this.MAX_LINEAR_SPEED : 
+															(this.OPTIMAL_SLIP_RATIO * this.speed);
+        this.setSpeed(Math.copySign(optimalSpeed, this.speed));
+      }
     }
 
     this.drivetrain.arcadeDrive(this.speed, -output, false);
@@ -160,10 +175,9 @@ public class DriveSubsystem extends PIDSubsystem {
       this.useOutput(this.getController().calculate(this.getMeasurement(), this.getSetpoint()), this.getSetpoint());
     }
     // Update the odometry in the periodic block
-    odometry.update(Rotation2d.fromDegrees(this.getAngle()), LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK,
-                                                          RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorPosition() * this.METERS_PER_TICK);
-
-    //System.out.println("Current position: " + odometry.getPoseMeters());
+    // Negate gyro angle because gyro is positive going clockwise which doesn't match WPILib convention
+    this.odometry.update(Rotation2d.fromDegrees(-this.getAngle()), LEFT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK,
+                                                          RIGHT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK);
   }
 
   /**
@@ -205,6 +219,8 @@ public class DriveSubsystem extends PIDSubsystem {
         this.was_turning = false;
       }
     }
+
+    this.drivetrain.feed();
   }
 
   /**
@@ -231,18 +247,19 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return The current wheel speeds.
    */
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(LEFT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity() * 10 * METERS_PER_TICK, 
-      RIGHT_MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity() * 10 * METERS_PER_TICK);
+    return new DifferentialDriveWheelSpeeds(LEFT_MASTER_MOTOR.getSelectedSensorVelocity() * 10 * METERS_PER_TICK, 
+      RIGHT_MASTER_MOTOR.getSelectedSensorVelocity() * 10 * METERS_PER_TICK);
   }
 
   /**
    * Resets the odometry to the specified pose.
    * @param pose The pose to which to set the odometry.
    */
-  public void resetOdometry(Pose2d pose) {
+  public void resetOdometry() {
+    this.resetAngle();
     LEFT_MASTER_MOTOR.setSelectedSensorPosition(0);
     RIGHT_MASTER_MOTOR.setSelectedSensorPosition(0);
-    odometry.resetPosition(pose, Rotation2d.fromDegrees(this.getAngle()));
+    this.odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(0));
   }
 
   /**
@@ -250,7 +267,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return The pose
    */
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return this.odometry.getPoseMeters();
   }
 
   /**
@@ -258,7 +275,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return the robot's heading in degrees, from 180 to 180
    */
   public double getHeading() {
-    return NAVX.getYaw();
+    return this.NAVX.getYaw();
   }
   
   /**
@@ -272,8 +289,8 @@ public class DriveSubsystem extends PIDSubsystem {
    * Reset left and right drive
    */
   public void resetEncoders() {
-    LEFT_MASTER_MOTOR.getSensorCollection().setIntegratedSensorPosition(0, 0);
-    RIGHT_MASTER_MOTOR.getSensorCollection().setIntegratedSensorPosition(0, 0);
+    LEFT_MASTER_MOTOR.setSelectedSensorPosition(0);
+    RIGHT_MASTER_MOTOR.setSelectedSensorPosition(0);
   }
 
   /**
@@ -281,7 +298,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return The turn rate of the robot, in degrees per second
    */
   public double getTurnRate() {
-    return NAVX.getRate() * -1;
+    return -NAVX.getRate();
   }
 
   /**
@@ -289,7 +306,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return Velocity of the robot as measured by the NAVX
    */
   public double getInertialVelocity() {
-    return Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2));
+    return (NAVX.isMoving()) ? Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)) : 0;
   }
 
   /**

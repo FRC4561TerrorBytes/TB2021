@@ -8,7 +8,6 @@
 package frc.robot.commands.automodes;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.AutoModePaths;
 import frc.robot.AutoTrajectory;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -21,10 +20,14 @@ public class PathARedAuto extends SequentialCommandGroup {
    */
   public PathARedAuto(DriveSubsystem driveSubsystem) {
     super(
-      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedOne, false).getCommand(),
-      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedTwo, false).getCommand(),
-      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedThree, false).getCommand(),
-      new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedEnd, false).getCommand()
+      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedOne, false).getCommand(),
+      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedTwo, false).getCommand(),
+      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedThree, false).getCommand(),
+      // new AutoTrajectory(driveSubsystem, AutoModePaths.PathA_RedEnd, false).getCommand()
+      new AutoTrajectory(driveSubsystem, "output/PathA_RedOne.wpilib.json").getCommand(),
+      new AutoTrajectory(driveSubsystem, "output/PathA_RedTwo.wpilib.json").getCommand(),
+      new AutoTrajectory(driveSubsystem, "output/PathA_RedThree.wpilib.json").getCommand(),
+      new AutoTrajectory(driveSubsystem, "output/PathA_RedFour.wpilib.json").getCommand()
     );
   }
 }

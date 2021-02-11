@@ -48,6 +48,8 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double DRIVETRAIN_EFFICIENCY = 0.85;
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.05;
+  private final double INERTAL_VELOCITY_THRESHOLD = 0.005;
+  private final int INERITAL_VELOCITY_SMOOTHING_FACTOR = 25;
 
   private final double MIN_TOLERANCE = 0.125;
 
@@ -146,6 +148,8 @@ public class DriveSubsystem extends PIDSubsystem {
       DifferentialDriveWheelSpeeds wheelSpeeds = this.getWheelSpeeds();
       double averageWheelSpeed = Math.abs((wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2);
       double inertialVelocity = this.getInertialVelocity();
+
+      // Get current slip ratio, ignoring slip when wheels are "under" speed
       double currentSlipRatio = (averageWheelSpeed > inertialVelocity) ?
 																(averageWheelSpeed - inertialVelocity) / averageWheelSpeed :
 																0;
@@ -306,7 +310,26 @@ public class DriveSubsystem extends PIDSubsystem {
    * @return Velocity of the robot as measured by the NAVX
    */
   public double getInertialVelocity() {
-    return (NAVX.isMoving()) ? Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)) : 0;
+    // Take five samples from the NAVX
+    double inertialVelocity[] = {
+      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
+      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
+      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
+      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
+      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2))
+    };
+
+    // Apply low pass filter
+    double value = inertialVelocity[0];
+    for (int i = 1; i < inertialVelocity.length; i++) {
+      value += (inertialVelocity[i] - value) / this.INERITAL_VELOCITY_SMOOTHING_FACTOR;
+      inertialVelocity[i] = value;
+    }
+
+    // Return the most smoothed value
+    return (inertialVelocity[inertialVelocity.length - 1] >= this.INERTAL_VELOCITY_THRESHOLD) ? 
+            inertialVelocity[inertialVelocity.length - 1] : 
+            0;
   }
 
   /**

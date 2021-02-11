@@ -29,8 +29,14 @@ import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
+import frc.robot.commands.automodes.BarrelAuto;
+import frc.robot.commands.automodes.BounceAuto;
+import frc.robot.commands.automodes.PathABlueAuto;
 import frc.robot.commands.automodes.PathARedAuto;
+import frc.robot.commands.automodes.PathBBlueAuto;
+import frc.robot.commands.automodes.PathBRedAuto;
 import frc.robot.commands.automodes.ShootDriveStraightAuto;
+import frc.robot.commands.automodes.SlolomAuto;
 import frc.robot.commands.automodes.TestReversePathWeaverAuto;
 import frc.robot.commands.automodes.TrenchSixBallAuto;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -98,6 +104,13 @@ public class RobotContainer {
     chooser.setDefaultOption("ShootDriveForward", new ShootDriveStraightAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
     chooser.addOption("Reverse PathWeaver Test", new TestReversePathWeaverAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("PathA_Red", new PathARedAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("PathA_Blue", new PathABlueAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("PathB_Red", new PathBRedAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("PathB_Blue", new PathBBlueAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Barrel_Auto", new BarrelAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Bounce_Auto", new BounceAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Slolom_Auto", new SlolomAuto(DRIVE_SUBSYSTEM));
+
     chooser.addOption("Pls work", new TrenchSixBallAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
         //chooser.addOption("ShootDriveBack", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.ShootDriveBack.trajectoryJSON).getCommand());
     // chooser.addOption("SIX BALL BOIS", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.SixBallTrench.trajectoryJSON).getCommand());

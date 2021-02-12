@@ -207,6 +207,9 @@ public final class Constants {
     public static final int HOOD_MOTOR_PORT = 9;
     public static final int TURRET_MOTOR_PORT = 8;
 
+    // PWM Ports
+    public static final int LIDAR_PORT = 0;
+
     // Digital ports
     public static final int LED_RING_PORT = 7;
 

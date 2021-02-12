@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -37,6 +38,9 @@ public class DriveSubsystem extends PIDSubsystem {
 
   private final WPI_TalonFX RIGHT_MASTER_MOTOR = new WPI_TalonFX(Constants.FRONT_RIGHT_MOTOR_PORT);
   private final WPI_TalonFX RIGHT_REAR_SLAVE = new WPI_TalonFX(Constants.REAR_RIGHT_MOTOR_PORT);
+
+  private final Counter LIDAR = new Counter(Constants.LIDAR_PORT);
+  private final double LIDAR_OFFSET = 10.0;
 
   private final double WHEEL_DIAMETER_METERS = 0.1524;
   private final double MOTOR_MAX_RPM = 6380;
@@ -131,10 +135,16 @@ public class DriveSubsystem extends PIDSubsystem {
       this.turn_scalar = turn_scalar;
       this.deadband = deadband;
 
+      // Configure LIDAR settings
+      LIDAR.setMaxPeriod(1.00); //set the max period that can be measured
+      LIDAR.setSemiPeriodMode(true); //Set the counter to period measurement
+      LIDAR.reset();
+
       if (Constants.DRIVE_DEBUG) {
         ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
         tab.addNumber("Drive Angle", () -> getHeading());
         tab.addNumber("Drive PID Output", () -> this.output);
+        tab.addNumber("Distance", () -> getLIDAR());
       }
   }
 
@@ -387,6 +397,18 @@ public class DriveSubsystem extends PIDSubsystem {
   public void resetAngle() {
     NAVX.reset();
   }
+
+  /**
+   * Get Distance from LIDAR sensor
+   * @return distance in Meters
+   */
+  public double getLIDAR() {
+    if(LIDAR.get() < 1)
+      return 0;
+    else
+      return ((LIDAR.getPeriod()*1000000.0/10.0) - this.LIDAR_OFFSET) / 10.0; //convert to distance. sensor is high 10 us for every centimeter. 
+  }
+
 
   /**
    * Invert Drive Motors

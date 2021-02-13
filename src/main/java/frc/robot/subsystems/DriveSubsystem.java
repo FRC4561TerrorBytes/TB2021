@@ -46,14 +46,14 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
   private final double GEAR_RATIO = 10.90909090; // 120 / 11
-  private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(WHEEL_DIAMETER_METERS * Math.PI);
+  private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(1 / (WHEEL_DIAMETER_METERS * Math.PI));
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER;
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
   private final double DRIVETRAIN_EFFICIENCY = 0.85;
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.05;
-  private final double INERTAL_VELOCITY_THRESHOLD = 0.005;
-  private final int INERITAL_VELOCITY_SMOOTHING_FACTOR = 25;
+  private final double INERTAL_VELOCITY_THRESHOLD = 0.0005;
+  private final int INERITAL_VELOCITY_SMOOTHING_FACTOR = 200;
 
   private final double MIN_TOLERANCE = 0.125;
 
@@ -190,8 +190,9 @@ public class DriveSubsystem extends PIDSubsystem {
     }
     // Update the odometry in the periodic block
     // Negate gyro angle because gyro is positive going clockwise which doesn't match WPILib convention
-    this.odometry.update(Rotation2d.fromDegrees(-this.getAngle()), LEFT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK,
-                                                          RIGHT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK);
+    this.odometry.update(Rotation2d.fromDegrees(-this.getAngle()), 
+                          -LEFT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK,
+                          RIGHT_MASTER_MOTOR.getSelectedSensorPosition() * this.METERS_PER_TICK);
   }
 
   /**
@@ -322,6 +323,7 @@ public class DriveSubsystem extends PIDSubsystem {
   public double getInertialVelocity() {
     // Take five samples from the NAVX
     double inertialVelocity[] = {
+      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
       Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
       Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
       Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),

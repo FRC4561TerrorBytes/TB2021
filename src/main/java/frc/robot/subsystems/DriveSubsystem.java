@@ -53,7 +53,7 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.05;
   private final double INERTAL_VELOCITY_THRESHOLD = 0.0005;
-  private final int INERITAL_VELOCITY_SMOOTHING_FACTOR = 200;
+  private final int INERITAL_VELOCITY_SMOOTHING_FACTOR = 500;
 
   private final double MIN_TOLERANCE = 0.125;
 

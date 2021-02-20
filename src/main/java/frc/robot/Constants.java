@@ -215,7 +215,7 @@ public final class Constants {
 
     // Motor Speeds - @author utkarsh
     public static final double MOTOR_STOP = 0;
-    public static final double INTAKE_MOTOR_SPEED = 0.75;
+    public static final double INTAKE_MOTOR_SPEED = 0.75; // 0.75
     public static final double OUTTAKE_MOTOR_SPEED = 1;
     public static final double LIFT_MOTOR_SPEED = 0.6;
     public static final double MAGAZINE_UP_MOTOR_SPEED = 0.6;

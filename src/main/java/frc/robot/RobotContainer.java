@@ -25,15 +25,14 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AutoChooseGroup;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
 import frc.robot.commands.automodes.BarrelAuto;
-import frc.robot.commands.automodes.BarrelContinuous;
 import frc.robot.commands.automodes.BounceAuto;
 import frc.robot.commands.automodes.PathABlueAuto;
-import frc.robot.commands.automodes.PathABlueContinuous;
 import frc.robot.commands.automodes.PathARedAuto;
 import frc.robot.commands.automodes.PathBBlueAuto;
 import frc.robot.commands.automodes.PathBRedAuto;
@@ -104,7 +103,6 @@ public class RobotContainer {
   private void AutoModeChooser(){
     //Creates a dropdown box in the Driver Station with Auto Mode options to run during the autonomous period. See Robot for execution of chosen auto mode.
     chooser.setDefaultOption("ShootDriveForward", new ShootDriveStraightAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
-    chooser.addOption("Reverse PathWeaver Test", new TestReversePathWeaverAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("PathA_Red", new PathARedAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("PathA_Blue", new PathABlueAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("PathB_Red", new PathBRedAuto(DRIVE_SUBSYSTEM));
@@ -112,6 +110,7 @@ public class RobotContainer {
     chooser.addOption("Barrel_Auto", new BarrelAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("Bounce_Auto", new BounceAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("Slolom_Auto", new SlolomAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Auto Choose", new AutoChooseGroup(DRIVE_SUBSYSTEM));
 
     chooser.addOption("Pls work", new TrenchSixBallAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
         //chooser.addOption("ShootDriveBack", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.ShootDriveBack.trajectoryJSON).getCommand());

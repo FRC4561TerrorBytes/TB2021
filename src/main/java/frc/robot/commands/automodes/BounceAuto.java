@@ -5,6 +5,7 @@
 package frc.robot.commands.automodes;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.AutoModePaths;
 import frc.robot.AutoTrajectory;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -17,10 +18,14 @@ public class BounceAuto extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     super(
-      new AutoTrajectory(driveSubsystem, "output/BounceOne.wpilib.json").getCommand(),
-      new AutoTrajectory(driveSubsystem, "output/BounceTwo.wpilib.json").getCommand(),
-      new AutoTrajectory(driveSubsystem, "output/BounceThree.wpilib.json").getCommand(),
-      new AutoTrajectory(driveSubsystem, "output/BounceFour.wpilib.json").getCommand()
+      // new AutoTrajectory(driveSubsystem, "output/BounceOne.wpilib.json").getCommand(),
+      // new AutoTrajectory(driveSubsystem, "output/BounceTwo.wpilib.json").getCommand(),
+      // new AutoTrajectory(driveSubsystem, "output/BounceThree.wpilib.json").getCommand(),
+      // new AutoTrajectory(driveSubsystem, "output/BounceFour.wpilib.json").getCommand()
+      new AutoTrajectory(driveSubsystem, AutoModePaths.BounceOne, false).getCommand(),
+      new AutoTrajectory(driveSubsystem, AutoModePaths.BounceTwo, true).getCommand(),
+      new AutoTrajectory(driveSubsystem, AutoModePaths.BounceThree, false).getCommand(),
+      new AutoTrajectory(driveSubsystem, AutoModePaths.BounceFour, true).getCommand()
 );
   }
 }

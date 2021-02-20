@@ -15,34 +15,65 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
  */
 public class AutoModePaths {
 
-    public static Pose2d[] ShootDriveStraight = { new Pose2d(2, 0, Rotation2d.fromDegrees(0)) };
+    public static Pose2d[] ShootDriveStraight = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(2, 0, Rotation2d.fromDegrees(0)) 
+    };
 
-    public static Pose2d[] ShootDriveBack = { new Pose2d(3, 0, Rotation2d.fromDegrees(0)) };
+    public static Pose2d[] ShootDriveBack = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(3, 0, Rotation2d.fromDegrees(0)) 
+    };
 
-    public static Pose2d[] TrenchSixBallPt1 = { new Pose2d(5, 0, Rotation2d.fromDegrees(0)) };
+    public static Pose2d[] TrenchSixBallPt1 = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(5, 0, Rotation2d.fromDegrees(0)) 
+    };
 
-    public static Pose2d[] TrenchSixBallPt2 = { new Pose2d(5, -2, Rotation2d.fromDegrees(0)) };
+    public static Pose2d[] TrenchSixBallPt2 = { 
+        new Pose2d(5, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(5, -2, Rotation2d.fromDegrees(0)) 
+    };
 
     // UNTESTED
-    public static Pose2d[] Shoot_Middle = { new Pose2d(-5, -2, Rotation2d.fromDegrees(0)) };
+    public static Pose2d[] Shoot_Middle = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(-5, -2, Rotation2d.fromDegrees(0)) 
+    };
 
     //UNTESTED
-    public static Pose2d[] Shoot_LoadingZone = { new Pose2d(-5, -4, Rotation2d.fromDegrees(0)) };
+    public static Pose2d[] Shoot_LoadingZone = { 
+        new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+        new Pose2d(-5, -4, Rotation2d.fromDegrees(0)) 
+    };
 
     
     // 2021 FaH autos
-    
-    //UNTESTED
-    public static Pose2d[] PathA_RedAll = {
-        new Pose2d(2, 0, Rotation2d.fromDegrees(0)),
-        new Pose2d(3.5, -0.76, Rotation2d.fromDegrees(-20)),
-        new Pose2d(4.26, 0.526, Rotation2d.fromDegrees(90)),
-        new Pose2d(7.26, 0.526, Rotation2d.fromDegrees(-70))
+
+    public static Pose2d[] BounceOne = { 
+        new Pose2d(1.504, -2.283, Rotation2d.fromDegrees(0)),
+        new Pose2d(2.3, -0.775, Rotation2d.fromDegrees(90)) 
     };
-    public static Pose2d[] PathA_RedOne = { new Pose2d(2, 0, Rotation2d.fromDegrees(0)) }; // 90
-    public static Pose2d[] PathA_RedTwo = { new Pose2d(1.5, -0.76, Rotation2d.fromDegrees(-20)) }; // 1.5, -0.76, -25 //45
-    public static Pose2d[] PathA_RedThree = { new Pose2d(0.76, 1.286, Rotation2d.fromDegrees(90)) }; //0.76, 2.286, 90
-    public static Pose2d[] PathA_RedEnd = { new Pose2d(3, 0, Rotation2d.fromDegrees(-70)) }; //5, 0, -70
+    public static Pose2d[] BounceTwo = { 
+        new Pose2d(2.3, -0.775, Rotation2d.fromDegrees(90)),
+        new Pose2d(3.229, -3.328, Rotation2d.fromDegrees(30)),
+        new Pose2d(4.454, -3.285, Rotation2d.fromDegrees(45)),
+        new Pose2d(4.585, -0.775, Rotation2d.fromDegrees(15)),
+    };
+    public static Pose2d[] BounceThree = { 
+        new Pose2d(4.585, -0.775, Rotation2d.fromDegrees(15)),
+        new Pose2d(5.147, -3.582, Rotation2d.fromDegrees(30)),
+        new Pose2d(6.538, -3.458, Rotation2d.fromDegrees(45)),
+        new Pose2d(6.865, -0.775, Rotation2d.fromDegrees(15)),
+    };
+    public static Pose2d[] BounceFour = { 
+        new Pose2d(6.865, -0.775, Rotation2d.fromDegrees(15)),
+        new Pose2d(7.386, -1.912, Rotation2d.fromDegrees(45)),
+        new Pose2d(8.808, -2.066, Rotation2d.fromDegrees(0)),
+    };
+
+
+
 }
 
 

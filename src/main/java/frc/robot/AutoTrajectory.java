@@ -117,7 +117,7 @@ public class AutoTrajectory {
     config.setReversed(isReversed);
     
     List<Pose2d> waypointList = new ArrayList<Pose2d>();
-    waypointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+    //waypointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     for(int i = 0; i < waypoints.length; i++) {
       waypointList.add(waypoints[i]);
     }
@@ -125,10 +125,9 @@ public class AutoTrajectory {
     // This transforms the starting position of the trajectory to match the starting position of the actual 
     // roboto. Prevents robot from moving to first X,Y of trajectory and then following the path.
     // Changes the first point(s) of the trajectory to the X,Y point of where the robot currently is
-    subsystem.resetOdometry();
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypointList, config);
     Transform2d transform = subsystem.getPose().minus(trajectory.getInitialPose());
-    Trajectory transformedTrajectory =  trajectory.transformBy(transform);
+    Trajectory transformedTrajectory = trajectory.transformBy(transform);
 
     // This is a method used to get the desired trajectory, put it into the command, have the command calculate the 
     // actual route relative to one plotted in Pathweaver, and then follow it the best it can, based on characterization given to it.

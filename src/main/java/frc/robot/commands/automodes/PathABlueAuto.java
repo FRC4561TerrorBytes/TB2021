@@ -15,10 +15,10 @@ public class PathABlueAuto extends SequentialCommandGroup {
   /** Creates a new PathABlueAuto. */
   public PathABlueAuto(DriveSubsystem driveSubsystem) {
   super(
-  new AutoTrajectory(driveSubsystem, "output/PathA_BlueOne.wpilib.json").getCommand(),
-  new AutoTrajectory(driveSubsystem, "output/PathA_BlueTwo.wpilib.json").getCommand(),
-  new AutoTrajectory(driveSubsystem, "output/PathA_BlueThree.wpilib.json").getCommand(),
-  new AutoTrajectory(driveSubsystem, "output/PathA_BlueFour.wpilib.json").getCommand()
+    new AutoTrajectory(driveSubsystem, "output/PathA_BlueOne.wpilib.json").getCommand(),
+    new AutoTrajectory(driveSubsystem, "output/PathA_BlueTwo.wpilib.json").getCommand(),
+    new AutoTrajectory(driveSubsystem, "output/PathA_BlueThree.wpilib.json").getCommand(),
+    new AutoTrajectory(driveSubsystem, "output/PathA_BlueFour.wpilib.json").getCommand()
 );
   }
 }

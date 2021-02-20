@@ -46,9 +46,9 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
   private final double GEAR_RATIO = 10.90909090; // 120 / 11
-  private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(1 / (WHEEL_DIAMETER_METERS * Math.PI));
-  private final double METERS_PER_TICK = 1 / TICKS_PER_METER;
-  private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION;
+  private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(1 / (WHEEL_DIAMETER_METERS * Math.PI)); //46644.183
+  private final double METERS_PER_TICK = 1 / TICKS_PER_METER; //2.149e-5
+  private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
   private final double DRIVETRAIN_EFFICIENCY = 0.85;
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.05;

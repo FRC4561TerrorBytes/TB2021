@@ -53,7 +53,8 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
   private final double OPTIMAL_SLIP_RATIO = 0.05;
   private final double INERTAL_VELOCITY_THRESHOLD = 0.0005;
-  private final int INERITAL_VELOCITY_SMOOTHING_FACTOR = 500;
+  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 50;
+  private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
 
   private final double MIN_TOLERANCE = 0.125;
 
@@ -63,6 +64,9 @@ public class DriveSubsystem extends PIDSubsystem {
   private double turn_scalar = 1.0;
   private double deadband = 0.0; 
   private double output = 0.0;
+  private double inertialVelocity = 0.0;
+  private double inertialVelocitySum = 0.0;
+  private int inertialVelocityIndex = 0;
 
   private boolean was_turning = false;
 
@@ -185,6 +189,8 @@ public class DriveSubsystem extends PIDSubsystem {
 
   @Override
   public void periodic() {
+    this.updateInertialVelocity();
+    
     if (this.isEnabled()) {
       this.useOutput(this.getController().calculate(this.getMeasurement(), this.getSetpoint()), this.getSetpoint());
     }
@@ -317,30 +323,36 @@ public class DriveSubsystem extends PIDSubsystem {
   }
 
   /**
+   * Update Robot's current inertial velocity (m/s) using a moving average
+   */
+  public void updateInertialVelocity() {
+    // Remove oldest reading from running sum
+    this.inertialVelocitySum = this.inertialVelocitySum - this.INERTIAL_VELOCITY_READINGS[this.inertialVelocityIndex];
+
+    // Get latest reading from NAVX
+    double latestReading = Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2));
+
+    // Add latest reading to array
+    this.INERTIAL_VELOCITY_READINGS[this.inertialVelocityIndex] = latestReading;
+
+    // Add latest reading to running sum of readings
+    this.inertialVelocitySum += latestReading;
+
+    // Increment index, wrapping around to zero if it surpasses window size
+    this.inertialVelocityIndex = (this.inertialVelocityIndex + 1) % this.INERTIAL_VELOCITY_WINDOW_SIZE;
+    
+    // Update inertial velocity variable with latest average
+    this.inertialVelocity = this.inertialVelocitySum / this.INERTIAL_VELOCITY_WINDOW_SIZE;
+  }
+
+  /**
    * Returns inertial velocity of the robot.
    * @return Velocity of the robot as measured by the NAVX
    */
   public double getInertialVelocity() {
-    // Take five samples from the NAVX
-    double inertialVelocity[] = {
-      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
-      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
-      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
-      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
-      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)),
-      Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2))
-    };
-
-    // Apply low pass filter
-    double value = inertialVelocity[0];
-    for (int i = 1; i < inertialVelocity.length; i++) {
-      value += (inertialVelocity[i] - value) / this.INERITAL_VELOCITY_SMOOTHING_FACTOR;
-      inertialVelocity[i] = value;
-    }
-
-    // Return the most smoothed value
-    return (inertialVelocity[inertialVelocity.length - 1] >= this.INERTAL_VELOCITY_THRESHOLD) ? 
-            inertialVelocity[inertialVelocity.length - 1] : 
+    // Return the latest moviing average, ignoring really small values
+    return (this.inertialVelocity >= this.INERTAL_VELOCITY_THRESHOLD) ? 
+            this.inertialVelocity : 
             0;
   }
 

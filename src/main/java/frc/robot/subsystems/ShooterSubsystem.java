@@ -118,7 +118,7 @@ public class ShooterSubsystem extends SubsystemBase {
       ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
       tab.addNumber("Flywheel Motor Output", () -> Flywheel.MASTER_MOTOR.getMotorOutputPercent());
       tab.addNumber("Flywheel Current", () -> Flywheel.MASTER_MOTOR.getSupplyCurrent());
-      tab.addNumber("Flywheel Motor Velocity", () -> Flywheel.ticksToRPM(Flywheel.MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity()));
+      tab.addNumber("Flywheel Motor Velocity", () -> Flywheel.ticksToRPM(Flywheel.MASTER_MOTOR.getSelectedSensorVelocity()));
       tab.addNumber("Flywheel Motor Setpoint", () -> Flywheel.ticksToRPM(Flywheel.MASTER_MOTOR.getClosedLoopTarget()));
       tab.addNumber("Flywheel Error", () -> flywheelError());
       tab.addBoolean("Flywheel at Speed?", () -> isFlywheelAtSpeed());
@@ -278,7 +278,7 @@ public class ShooterSubsystem extends SubsystemBase {
    * @return flywheel error (ticks per 100ms)
    */
   public double flywheelError() {
-    return Flywheel.MASTER_MOTOR.getClosedLoopTarget() - Flywheel.MASTER_MOTOR.getSensorCollection().getIntegratedSensorVelocity();
+    return Flywheel.MASTER_MOTOR.getClosedLoopTarget() - Flywheel.MASTER_MOTOR.getSelectedSensorVelocity();
   }
 
   /**

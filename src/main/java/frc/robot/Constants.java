@@ -67,10 +67,10 @@ public final class Constants {
 
 
     // Shooter PID Values
-    private static final double FLYWHEEL_kP = 0.9;
-    private static final double FLYWHEEL_kI = 0.8;
-    private static final double FLYWHEEL_kD = 0.1;
-    private static final double FLYWHEEL_TOLERANCE = 700;
+    private static final double FLYWHEEL_kP = 1.15;
+    private static final double FLYWHEEL_kI = 0.98;
+    private static final double FLYWHEEL_kD = 0.11;
+    private static final double FLYWHEEL_TOLERANCE = 2500;
     private static final boolean FLYWHEEL_MASTER_ENCODER_SENSOR_PHASE = false;
     private static final boolean FLYWHEEL_MASTER_MOTOR_INVERTED = false;
 
@@ -208,7 +208,7 @@ public final class Constants {
     public static final int TURRET_MOTOR_PORT = 8;
 
     // PWM Ports
-    public static final int LIDAR_PORT = 0;
+    public static final int LIDAR_PORT = 6;
 
     // Digital ports
     public static final int LED_RING_PORT = 7;
@@ -217,8 +217,8 @@ public final class Constants {
     public static final double MOTOR_STOP = 0;
     public static final double INTAKE_MOTOR_SPEED = 0.75; // 0.75
     public static final double OUTTAKE_MOTOR_SPEED = 1;
-    public static final double LIFT_MOTOR_SPEED = 0.6;
-    public static final double MAGAZINE_UP_MOTOR_SPEED = 0.6;
+    public static final double LIFT_MOTOR_SPEED = 1.0;
+    public static final double MAGAZINE_UP_MOTOR_SPEED = 0.75;
     public static final double MAGAZINE_DOWN_MOTOR_SPEED = 0.2;
     public static final double MOUSE_DROID_SPEED = .5;
 

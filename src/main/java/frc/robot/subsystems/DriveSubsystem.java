@@ -67,6 +67,7 @@ public class DriveSubsystem extends PIDSubsystem {
   private double inertialVelocity = 0.0;
   private double inertialVelocitySum = 0.0;
   private int inertialVelocityIndex = 0;
+  private double tolerance = 0;
 
   private boolean was_turning = false;
 
@@ -124,6 +125,7 @@ public class DriveSubsystem extends PIDSubsystem {
       this.setSetpoint(0);
 
       // Set drive PID tolerance, minimum is 0.125 degree
+      this.tolerance = tolerance;
       if (tolerance < this.MIN_TOLERANCE) tolerance = this.MIN_TOLERANCE;
       this.getController().setTolerance(tolerance);
 
@@ -245,14 +247,33 @@ public class DriveSubsystem extends PIDSubsystem {
   }
 
   /**
+   * Turn robot to set angle
+   * @param angle In degrees
+   * @return True when complete
+   */
+  public void turnToAngle(double angle) {
+    this.resetAngle();
+    this.setSetpoint(angle);
+  }
+
+  /**
    * Controls the left and right sides of the drive directly with voltages.
-   * @param leftVolts  the commanded left output
-   * @param rightVolts  the commanded right output
+   * @param leftVolts  the commanded left output [-12, 12]
+   * @param rightVolts  the commanded right output [-12, 12]
    */
   public void tankDriveVolts(double leftVolts, double rightVolts) {
     LEFT_MASTER_MOTOR.setVoltage(-leftVolts);
     RIGHT_MASTER_MOTOR.setVoltage(rightVolts);
     drivetrain.feed();
+  }
+
+  /**
+   * Set speed of left and right drive seperately
+   * @param leftSpeed speed [-1, 1]
+   * @param rightSpeed speed [-1, 1]
+   */
+  public void tankDrive(double leftSpeed, double rightSpeed) {
+    this.drivetrain.tankDrive(leftSpeed, rightSpeed, false);
   }
 
   /**
@@ -413,6 +434,14 @@ public class DriveSubsystem extends PIDSubsystem {
   }
 
   /**
+   * Returns tolerance
+   * @return tolerance
+   */
+  public double getTolerance() {
+    return this.tolerance;
+  }
+
+  /**
    * Get Distance from LIDAR sensor
    * @return distance in Meters
    */
@@ -420,7 +449,7 @@ public class DriveSubsystem extends PIDSubsystem {
     if(LIDAR.get() < 1)
       return 0;
     else
-      return ((LIDAR.getPeriod()*1000000.0/10.0) - this.LIDAR_OFFSET) / 10.0; //convert to distance. sensor is high 10 us for every centimeter. 
+      return ((LIDAR.getPeriod()*1000000.0/10.0) - this.LIDAR_OFFSET) / 100.0; //convert to distance. sensor is high 10 us for every centimeter. 
   }
 
 

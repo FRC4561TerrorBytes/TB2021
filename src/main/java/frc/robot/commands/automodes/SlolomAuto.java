@@ -14,6 +14,9 @@ import frc.robot.subsystems.DriveSubsystem;
 public class SlolomAuto extends SequentialCommandGroup {
   /** Creates a new SlolomAuto. */
   public SlolomAuto(DriveSubsystem driveSubsystem) {
+    // Max Velocity: 1.5
+    // Max Acceleration: 0.75
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     super(

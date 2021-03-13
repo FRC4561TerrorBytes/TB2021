@@ -5,23 +5,20 @@
 package frc.robot.commands.automodes;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.AutoModePaths;
 import frc.robot.AutoTrajectory;
 import frc.robot.subsystems.DriveSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class BarrelAuto extends SequentialCommandGroup {
-  /** Creates a new BarrelAuto. */
-  public BarrelAuto(DriveSubsystem driveSubsystem) {
-
-    // Max Velocity: 1.5
-    // Max Acceleration: 0.5
-
+public class TestAuto extends SequentialCommandGroup {
+  /** Creates a new TestAuto. */
+  public TestAuto(DriveSubsystem driveSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     super(
-      new AutoTrajectory(driveSubsystem, "output/BarrelAll.wpilib.json").getCommand()
+      new AutoTrajectory(driveSubsystem, AutoModePaths.TestOne, true).getCommand()
 );
   }
 }

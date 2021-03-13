@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.automodes.PathABlueAuto;
 import frc.robot.commands.automodes.PathARedAuto;
+import frc.robot.commands.automodes.PathBBlueAuto;
 import frc.robot.commands.automodes.PathBRedAuto;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -25,13 +26,14 @@ public class AutoChooseCommand extends CommandBase {
   @Override
   public void initialize() {
     if (this.subsystem.getLIDAR() >= 1) {
-      commandGroup = new PathABlueAuto(this.subsystem);
-    } else if (this.subsystem.getLIDAR() >= 1.5) {
-      commandGroup = new PathARedAuto(this.subsystem);
-    } else if (this.subsystem.getLIDAR() >= 1.5) {
-      commandGroup = new PathABlueAuto(this.subsystem);
-    } else if (this.subsystem.getLIDAR() >= 2) {
-      commandGroup = new PathBRedAuto(this.subsystem);
+      if (this.subsystem.getLIDAR() >= 3.7)
+        commandGroup = new PathABlueAuto(this.subsystem);
+      else if (this.subsystem.getLIDAR() >= 3.4)
+        commandGroup = new PathBBlueAuto(this.subsystem);
+      else if (this.subsystem.getLIDAR() >= 2.2)
+        commandGroup = new PathARedAuto(this.subsystem);
+      else if (this.subsystem.getLIDAR() >= 1.1)
+        commandGroup = new PathBRedAuto(this.subsystem);
     } 
   }
 

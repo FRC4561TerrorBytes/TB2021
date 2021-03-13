@@ -31,15 +31,16 @@ import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
 import frc.robot.commands.automodes.BarrelAuto;
+import frc.robot.commands.automodes.BarrelContinuous;
 import frc.robot.commands.automodes.BounceAuto;
 import frc.robot.commands.automodes.PathABlueAuto;
 import frc.robot.commands.automodes.PathARedAuto;
 import frc.robot.commands.automodes.PathBBlueAuto;
 import frc.robot.commands.automodes.PathBRedAuto;
 import frc.robot.commands.automodes.ShootDriveStraightAuto;
+import frc.robot.commands.automodes.ShowOffAuto;
 import frc.robot.commands.automodes.SlolomAuto;
-import frc.robot.commands.automodes.TestReversePathWeaverAuto;
-import frc.robot.commands.automodes.TrenchSixBallAuto;
+import frc.robot.commands.automodes.TestAuto;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.MagazineSubsystem;
@@ -107,12 +108,13 @@ public class RobotContainer {
     chooser.addOption("PathA_Blue", new PathABlueAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("PathB_Red", new PathBRedAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("PathB_Blue", new PathBBlueAuto(DRIVE_SUBSYSTEM));
-    chooser.addOption("Barrel_Auto", new BarrelAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Barrel_Auto", new BarrelContinuous(DRIVE_SUBSYSTEM));
     chooser.addOption("Bounce_Auto", new BounceAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("Slolom_Auto", new SlolomAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("Show_Off", new ShowOffAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
     chooser.addOption("Auto Choose", new AutoChooseGroup(DRIVE_SUBSYSTEM));
-
-    chooser.addOption("Pls work", new TrenchSixBallAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
+    
+    chooser.addOption("TestAuto", new TestAuto(DRIVE_SUBSYSTEM));
         //chooser.addOption("ShootDriveBack", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.ShootDriveBack.trajectoryJSON).getCommand());
     // chooser.addOption("SIX BALL BOIS", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.SixBallTrench.trajectoryJSON).getCommand());
     SmartDashboard.putData("Auto mode", chooser);

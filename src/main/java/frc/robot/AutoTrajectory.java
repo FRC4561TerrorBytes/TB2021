@@ -39,9 +39,9 @@ public class AutoTrajectory {
   final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.75;
   final double TRACK_WIDTH = 0.59597; //1.2409
   final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(TRACK_WIDTH);
-  final double VOLTS_kS = 0.694;
+  final double VOLTS_kS = 0.694; // 0.694
   final double VOLT_SECONDS_PER_METER_kV = 2.6;
-  final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.335;
+  final double VOLT_SECONDS_SQUARD_PER_METER_kA = 0.335; // 0.335
   final double kP = 0; //2.6e-5
   final double kD = 0; //2.21e-5
   final double kRamseteB = 2.0; // 0.75

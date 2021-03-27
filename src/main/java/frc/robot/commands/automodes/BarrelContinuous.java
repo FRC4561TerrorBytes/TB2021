@@ -21,6 +21,7 @@ public class BarrelContinuous extends SequentialCommandGroup {
       new AutoTrajectory(driveSubsystem, "output/BarrelTwo.wpilib.json").getCommand(),
       new AutoTrajectory(driveSubsystem, "output/BarrelThree.wpilib.json").getCommand(),
       new AutoTrajectory(driveSubsystem, "output/BarrelFour.wpilib.json").getCommand()
+      // new AutoTrajectory(driveSubsystem, "output/BarrelThreePointFive.wpilib.json").getCommand()
     );
   }
 }

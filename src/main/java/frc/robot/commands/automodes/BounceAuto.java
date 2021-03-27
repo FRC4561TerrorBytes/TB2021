@@ -24,7 +24,7 @@ public class BounceAuto extends SequentialCommandGroup {
       new AutoTrajectory(driveSubsystem, "output/BounceOne.wpilib.json").getCommand(),
       new AutoTurnCommand(driveSubsystem, 0.125, 170, AutoTurnCommand.Direction.Right),
       new AutoTrajectory(driveSubsystem, "output/BounceTwo.wpilib.json").getCommand(),
-      new AutoTurnCommand(driveSubsystem, 0.125, 165, AutoTurnCommand.Direction.Right),
+      new AutoTurnCommand(driveSubsystem, 0.125, 180, AutoTurnCommand.Direction.Right),
       new AutoTrajectory(driveSubsystem, "output/BounceThree.wpilib.json").getCommand(),
       new AutoTurnCommand(driveSubsystem, 0.125, 165, AutoTurnCommand.Direction.Right),
       new AutoTrajectory(driveSubsystem, "output/BounceFour.wpilib.json").getCommand()

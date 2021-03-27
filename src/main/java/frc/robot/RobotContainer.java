@@ -104,15 +104,15 @@ public class RobotContainer {
   private void AutoModeChooser(){
     //Creates a dropdown box in the Driver Station with Auto Mode options to run during the autonomous period. See Robot for execution of chosen auto mode.
     chooser.setDefaultOption("ShootDriveForward", new ShootDriveStraightAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
-    chooser.addOption("PathA_Red", new PathARedAuto(DRIVE_SUBSYSTEM));
-    chooser.addOption("PathA_Blue", new PathABlueAuto(DRIVE_SUBSYSTEM));
-    chooser.addOption("PathB_Red", new PathBRedAuto(DRIVE_SUBSYSTEM));
-    chooser.addOption("PathB_Blue", new PathBBlueAuto(DRIVE_SUBSYSTEM));
+    chooser.addOption("PathA_Red", new PathARedAuto(DRIVE_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
+    chooser.addOption("PathA_Blue", new PathABlueAuto(DRIVE_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
+    chooser.addOption("PathB_Red", new PathBRedAuto(DRIVE_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
+    chooser.addOption("PathB_Blue", new PathBBlueAuto(DRIVE_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
     chooser.addOption("Barrel_Auto", new BarrelContinuous(DRIVE_SUBSYSTEM));
     chooser.addOption("Bounce_Auto", new BounceAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("Slolom_Auto", new SlolomAuto(DRIVE_SUBSYSTEM));
     chooser.addOption("Show_Off", new ShowOffAuto(DRIVE_SUBSYSTEM, SHOOTER_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
-    chooser.addOption("Auto Choose", new AutoChooseGroup(DRIVE_SUBSYSTEM));
+    chooser.addOption("Auto Choose", new AutoChooseGroup(DRIVE_SUBSYSTEM, MAGAZINE_SUBSYSTEM));
     
     chooser.addOption("TestAuto", new TestAuto(DRIVE_SUBSYSTEM));
         //chooser.addOption("ShootDriveBack", new AutoTrajectory(DRIVE_SUBSYSTEM, AutoModeConstants.ShootDriveBack.trajectoryJSON).getCommand());

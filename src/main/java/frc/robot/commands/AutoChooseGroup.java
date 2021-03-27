@@ -6,17 +6,18 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.MagazineSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoChooseGroup extends SequentialCommandGroup {
   /** Creates a new AutoChooseGroup. */
-  public AutoChooseGroup(DriveSubsystem subsystem) {
+  public AutoChooseGroup(DriveSubsystem driveSubsystem, MagazineSubsystem magazineSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     super(
-      new AutoChooseCommand(subsystem)
+      new AutoChooseCommand(driveSubsystem, magazineSubsystem)
     );
   }
 }

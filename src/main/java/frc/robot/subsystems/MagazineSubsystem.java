@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.TalonPIDConfig;
 
@@ -82,18 +83,21 @@ public class MagazineSubsystem extends SubsystemBase {
    * @param speed (double) how fast you want the motor to spin [-1, 1]
    */
   public void ballUptake(double speed) {
-    try {
-      /*
+    /*
       Method is called continuously when a button on the xbox controller is held
       will sleep for UPTAKE_MOTOR_DELAY in milliseconds before actually running the uptake to speed
       Allows for maybe smoother intake by doing short, quick intervals of speed
       */
+    try {
       Thread.sleep(Constants.UPTAKE_MOTOR_DELAY);
+
+      // new WaitCommand(0.5);
+
     } catch (InterruptedException e) {
-      //Fail safe to stop motors in case loop is interrupted. 
-      MAGAZINE_MOTOR.set(0);
+      MAGAZINE_MOTOR.set(0); //Fail safe to stop motors in case loop is interrupted.
       System.out.println("UPTAKE MOTOR DELAY FAILED");
       e.printStackTrace();
+     
     }
     MAGAZINE_MOTOR.set(speed);
   }

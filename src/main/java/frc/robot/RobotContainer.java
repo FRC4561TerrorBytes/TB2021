@@ -232,7 +232,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     //Sets the autonomous command to be executed to the Auto Mode chosen from the Driver Station
-    return chooser.getSelected(); //TODO: Test SendableChooser
+    return chooser.getSelected();
   }
 
   /**

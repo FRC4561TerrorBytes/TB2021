@@ -99,6 +99,14 @@ public class AutoTrajectory {
     );
 
   }
+/**
+   * Creates new path trajectory using a physical x,y coordinate points
+   * @param subsystem DriveSubsystem required for drivetrain movement
+   * @param waypoints list of x, y coordinate pairs in trajectory
+   * @param isReversed whether the trajectory followed should be in reverse
+   */
+
+
   //Generates trajectory from list of Pose[2d] with waypoints
   public AutoTrajectory(DriveSubsystem subsystem, Pose2d[] waypoints, boolean isReversed) {
     this.subsystem = subsystem;
@@ -123,7 +131,7 @@ public class AutoTrajectory {
     }
 
     // This transforms the starting position of the trajectory to match the starting position of the actual 
-    // roboto. Prevents robot from moving to first X,Y of trajectory and then following the path.
+    // robot. Prevents robot from moving to first X,Y of trajectory and then following the path.
     // Changes the first point(s) of the trajectory to the X,Y point of where the robot currently is
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypointList, config);
     Transform2d transform = subsystem.getPose().minus(trajectory.getInitialPose());

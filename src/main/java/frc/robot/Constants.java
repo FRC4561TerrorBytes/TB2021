@@ -218,6 +218,7 @@ public final class Constants {
     public static final double INTAKE_MOTOR_SPEED = 0.75; // 0.75
     public static final double OUTTAKE_MOTOR_SPEED = 1;
     public static final double LIFT_MOTOR_SPEED = 1.0;
+    public static final int UPTAKE_MOTOR_DELAY = 500; //in milliseconds
     public static final double MAGAZINE_UP_MOTOR_SPEED = 0.75;
     public static final double MAGAZINE_DOWN_MOTOR_SPEED = 0.2;
     public static final double MOUSE_DROID_SPEED = .5;

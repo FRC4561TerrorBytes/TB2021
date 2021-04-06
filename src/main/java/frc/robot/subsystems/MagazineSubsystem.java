@@ -82,8 +82,27 @@ public class MagazineSubsystem extends SubsystemBase {
    * @param speed (double) how fast you want the motor to spin [-1, 1]
    */
   public void ballUptake(double speed) {
+    try {
+      /*
+      Method is called continuously when a button on the xbox controller is held
+      will sleep for UPTAKE_MOTOR_DELAY in milliseconds before actually running the uptake to speed
+      Allows for maybe smoother intake by doing short, quick intervals of speed
+      */
+      Thread.sleep(Constants.UPTAKE_MOTOR_DELAY);
+    } catch (InterruptedException e) {
+      //Fail safe to stop motors in case loop is interrupted. 
+      MAGAZINE_MOTOR.set(0);
+      System.out.println("UPTAKE MOTOR DELAY FAILED");
+      e.printStackTrace();
+    }
     MAGAZINE_MOTOR.set(speed);
   }
+
+//BACKUP IN CASE LOOP ABOVE DOES NOT WORK
+  // public void ballUptake(double speed) {
+  //   MAGAZINE_MOTOR.set(speed);
+  // }
+
 
   /**
    * Stop magazine

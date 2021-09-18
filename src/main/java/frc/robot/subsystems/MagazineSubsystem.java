@@ -51,8 +51,8 @@ public class MagazineSubsystem extends SubsystemBase {
    */
   public MagazineSubsystem(TalonPIDConfig config) {
     this.config = config;
-    this.config.initializeTalonPID(ARM_MOTOR, FeedbackDevice.CTRE_MagEncoder_Relative, false, true);
-    ARM_MOTOR.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.NormallyOpen);
+    this.config.initializeTalonPID(ARM_MOTOR, FeedbackDevice.None, false, true);
+    // ARM_MOTOR.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.NormallyOpen);
 
     if (Constants.MAGAZINE_DEBUG) {
       // Display the magazine's motor and sensor values on a Shuffleboard tab for debugging
@@ -207,10 +207,10 @@ public class MagazineSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    if (ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed() && this.armNeedsReset) {
-      this.armNeedsReset = false;
-      ARM_MOTOR.setSelectedSensorPosition(0);
-    } else if (!ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed()) this.armNeedsReset = true;
+    // if (ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed() && this.armNeedsReset) {
+    //   this.armNeedsReset = false;
+    //   ARM_MOTOR.setSelectedSensorPosition(0);
+    // } else if (!ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed()) this.armNeedsReset = true;
   }
 
   /**

@@ -38,6 +38,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private static final WPI_TalonFX MASTER_MOTOR = new WPI_TalonFX(Constants.FLYWHEEL_MASTER_MOTOR_PORT);
     private static final WPI_TalonFX SLAVE_MOTOR = new WPI_TalonFX(Constants.FLYWHEEL_SLAVE_MOTOR_PORT);
     private static TalonPIDConfig masterConfig;
+    private static boolean isRunning = false;
 
     private static double rpmToTicksPer100ms(double speed) {
       return (speed * TICKS_PER_ROTATION) / 600;
@@ -302,6 +303,17 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   public boolean turretLimitBack() {
     return Turret.MOTOR.getSensorCollection().isFwdLimitSwitchClosed(); // TODO: Figure out if this is right
+  }
+
+  public void toggleFlywheel(double speed) {
+    if (!Flywheel.isRunning) {
+      flywheelManual(speed);
+      Flywheel.isRunning = true;
+    }
+    else {
+      flywheelStop();
+      Flywheel.isRunning = false;
+    }
   }
 
   /**

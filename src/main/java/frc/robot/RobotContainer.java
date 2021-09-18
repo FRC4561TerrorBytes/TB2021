@@ -30,6 +30,7 @@ import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
+import frc.robot.commands.UptakeCommand;
 import frc.robot.commands.automodes.BarrelAuto;
 import frc.robot.commands.automodes.BarrelContinuous;
 import frc.robot.commands.automodes.BounceAuto;
@@ -95,7 +96,7 @@ public class RobotContainer {
 
     // Set default commands for subsystems
     DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(LEFT_JOYSTICK.getY(), RIGHT_JOYSTICK.getX(), Constants.DRIVE_RESPONSE_EXPONENT), DRIVE_SUBSYSTEM));
-    MAGAZINE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(), MAGAZINE_SUBSYSTEM));
+    // MAGAZINE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(), MAGAZINE_SUBSYSTEM));
 
     //Create Auto Mode Selection
     AutoModeChooser();
@@ -138,10 +139,10 @@ public class RobotContainer {
 
     // Right joystick shoot button 3
     new JoystickButton(RIGHT_JOYSTICK, 3)
-      .whileHeld(new RunCommand(() -> SHOOTER_SUBSYSTEM.flywheelManual(1), SHOOTER_SUBSYSTEM));
+      .whenPressed(new InstantCommand(() -> SHOOTER_SUBSYSTEM.toggleFlywheel(1.0), SHOOTER_SUBSYSTEM));
 
-    new JoystickButton(RIGHT_JOYSTICK, 3)
-      .whenReleased(new RunCommand(() -> SHOOTER_SUBSYSTEM.flywheelStop(), SHOOTER_SUBSYSTEM));
+    // new JoystickButton(RIGHT_JOYSTICK, 3)
+    //   .whenReleased(new RunCommand(() -> SHOOTER_SUBSYSTEM.flywheelStop(), SHOOTER_SUBSYSTEM));
       // .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(0), MAGAZINE_SUBSYSTEM));
 
     // Right joystick shoot button 4
@@ -154,8 +155,11 @@ public class RobotContainer {
       .whenReleased(new IntakeCommand(MAGAZINE_SUBSYSTEM, Constants.MOTOR_STOP));
     
     // Right joystick Arm Toggle button 2
+    // new JoystickButton(LEFT_JOYSTICK, 2)
+    //   .whenPressed(new InstantCommand(() -> MAGAZINE_SUBSYSTEM.toggleArmPosition(), MAGAZINE_SUBSYSTEM));
     new JoystickButton(LEFT_JOYSTICK, 2)
-      .whenPressed(new InstantCommand(() -> MAGAZINE_SUBSYSTEM.toggleArmPosition(), MAGAZINE_SUBSYSTEM));
+      .whileHeld(new RunCommand(()-> MAGAZINE_SUBSYSTEM.armManual(0.1), MAGAZINE_SUBSYSTEM))
+      .whenReleased(new InstantCommand(()-> MAGAZINE_SUBSYSTEM.armManual(Constants.MOTOR_STOP), MAGAZINE_SUBSYSTEM));
 
     // Right joystick turret to 180 button 3
     new JoystickButton(LEFT_JOYSTICK, 3)
@@ -198,6 +202,8 @@ public class RobotContainer {
     // Uptake
     new POVButton(XBOX_CONTROLLER, 0).whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(Constants.MAGAZINE_UP_MOTOR_SPEED), MAGAZINE_SUBSYSTEM))
       .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptakeStop()));
+    // new POVButton(XBOX_CONTROLLER, 0).whileHeld(new UptakeCommand(MAGAZINE_SUBSYSTEM))
+    //   .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptakeStop()));
 
     new POVButton(XBOX_CONTROLLER, 180).whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(-Constants.MAGAZINE_DOWN_MOTOR_SPEED), MAGAZINE_SUBSYSTEM))
       .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptakeStop()));

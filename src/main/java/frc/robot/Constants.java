@@ -34,7 +34,7 @@ public final class Constants {
     public static final double DRIVE_kP = 0.018; //0.018
     public static final double DRIVE_kD = 0.00029; //0.00029
     public static final double DRIVE_PERIOD_SECONDS = 1 / 50;
-    public static final double DRIVE_TURN_SCALAR = 30.0;
+    public static final double DRIVE_TURN_SCALAR = 20.0;
     public static final double DRIVE_TOLERANCE = 0.25;
     public static final int DRIVE_RESPONSE_EXPONENT = 1;
 
@@ -47,10 +47,10 @@ public final class Constants {
 		public static final double TURRET_TURN_DAMPER = 0.15; // [0, 1]
 
     // Intake Arm PID config
-    private static final double ARM_kP = 0.9;
-    private static final double ARM_kD = 0.1;
+    private static final double ARM_kP = 12.0;
+    private static final double ARM_kD = 4.0;
     private static final double ARM_kF = 0.000;
-    private static final double ARM_TOLERANCE = 5.0;
+    private static final double ARM_TOLERANCE = 10;
     private static final double ARM_LOWER_LIMIT = -1500;
     private static final double ARM_UPPER_LIMIT = 0;
     private static final double ARM_VELOCITY = 1;
@@ -101,7 +101,7 @@ public final class Constants {
     public static final int TURRET_STRAIGHT_POSITION = 3300;
     public static final int TURRET_MIDDLE_POSITION = 9700;
     public static final int TURRET_SIXBALL_POSITION = 13000;
-    public static final int TURRET_BACK_POSITION = 16100;
+    public static final int TURRET_BACK_POSITION = 18350;
     public static final int TURRET_BACK_LIMIT_POSITION = 22000;
 
     // Set PID for Flywheel

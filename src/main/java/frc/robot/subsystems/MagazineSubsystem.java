@@ -52,7 +52,10 @@ public class MagazineSubsystem extends SubsystemBase {
   public MagazineSubsystem(TalonPIDConfig config) {
     this.config = config;
     this.config.initializeTalonPID(ARM_MOTOR, FeedbackDevice.None, false, true);
-    // ARM_MOTOR.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.NormallyOpen);
+    // ARM_MOTOR.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.NormallyOpen);
+
+    // ARM_MOTOR.setSelectedSensorPosition(Constants.ARM_TOP_POSITION);
+    // this.armSetPosition(Constants.ARM_TOP_POSITION);
 
     if (Constants.MAGAZINE_DEBUG) {
       // Display the magazine's motor and sensor values on a Shuffleboard tab for debugging
@@ -88,17 +91,6 @@ public class MagazineSubsystem extends SubsystemBase {
       will sleep for UPTAKE_MOTOR_DELAY in milliseconds before actually running the uptake to speed
       Allows for maybe smoother intake by doing short, quick intervals of speed
       */
-    try {
-      Thread.sleep(Constants.UPTAKE_MOTOR_DELAY);
-
-      // new WaitCommand(0.5);
-
-    } catch (InterruptedException e) {
-      MAGAZINE_MOTOR.set(0); //Fail safe to stop motors in case loop is interrupted.
-      System.out.println("UPTAKE MOTOR DELAY FAILED");
-      e.printStackTrace();
-     
-    }
     MAGAZINE_MOTOR.set(speed);
   }
 
@@ -207,10 +199,10 @@ public class MagazineSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    // if (ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed() && this.armNeedsReset) {
-    //   this.armNeedsReset = false;
-    //   ARM_MOTOR.setSelectedSensorPosition(0);
-    // } else if (!ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed()) this.armNeedsReset = true;
+    if (ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed() && this.armNeedsReset) {
+      this.armNeedsReset = false;
+      ARM_MOTOR.setSelectedSensorPosition(Constants.ARM_TOP_POSITION);
+    } else if (!ARM_MOTOR.getSensorCollection().isFwdLimitSwitchClosed()) this.armNeedsReset = true;
   }
 
   /**

@@ -29,6 +29,8 @@ public class ShootDriveStraightAuto extends SequentialCommandGroup {
   public ShootDriveStraightAuto(DriveSubsystem driveSubsystem, ShooterSubsystem shooterSubsystem, MagazineSubsystem magazineSubsystem) {
 
     super(
+      new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_BACK_LIMIT_POSITION, false),
+      new WaitCommand(0.25),
       new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_BACK_POSITION, false),
       new InstantCommand(()-> shooterSubsystem.toggleHoodPosition(), shooterSubsystem),
       new ShootCommand(shooterSubsystem, magazineSubsystem, 5400).withTimeout(8),

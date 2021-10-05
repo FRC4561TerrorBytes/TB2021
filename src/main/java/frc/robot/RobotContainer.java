@@ -30,7 +30,7 @@ import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
-import frc.robot.commands.UptakeCommand;
+//import frc.robot.commands.UptakeCommand;
 import frc.robot.commands.automodes.BarrelAuto;
 import frc.robot.commands.automodes.BarrelContinuous;
 import frc.robot.commands.automodes.BounceAuto;
@@ -156,9 +156,9 @@ public class RobotContainer {
     
     // Right joystick Arm Toggle button 2
     // new JoystickButton(LEFT_JOYSTICK, 2)
-    //   .whenPressed(new InstantCommand(() -> MAGAZINE_SUBSYSTEM.toggleArmPosition(), MAGAZINE_SUBSYSTEM));
+    //   .whenPressed(new InstantCommand(() -> MAGAZINE_SUBSYSTEM.armSetPosition(-750), MAGAZINE_SUBSYSTEM));
     new JoystickButton(LEFT_JOYSTICK, 2)
-      .whileHeld(new RunCommand(()-> MAGAZINE_SUBSYSTEM.armManual(0.1), MAGAZINE_SUBSYSTEM))
+      .whileHeld(new RunCommand(()-> MAGAZINE_SUBSYSTEM.armManual(0.3), MAGAZINE_SUBSYSTEM))
       .whenReleased(new InstantCommand(()-> MAGAZINE_SUBSYSTEM.armManual(Constants.MOTOR_STOP), MAGAZINE_SUBSYSTEM));
 
     // Right joystick turret to 180 button 3
@@ -185,19 +185,19 @@ public class RobotContainer {
       .whenPressed(new TurretSetpointCommand(SHOOTER_SUBSYSTEM, Constants.TURRET_STRAIGHT_POSITION, TURRET_SETPOINT_VISION_INTERRUPT));
 
     new JoystickButton(XBOX_CONTROLLER, Button.kBumperLeft.value)
-      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armPositionRelative(-Constants.ARM_MANUAL_INCREMENT), MAGAZINE_SUBSYSTEM));
+      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(-0.4), MAGAZINE_SUBSYSTEM));
 
     new JoystickButton(XBOX_CONTROLLER, Button.kBumperRight.value)
-      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armPositionRelative(Constants.ARM_MANUAL_INCREMENT), MAGAZINE_SUBSYSTEM));
+      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(0.4), MAGAZINE_SUBSYSTEM));
 
     // Vision toggle
     VisionData.setEnabled(false);
     new JoystickButton(XBOX_CONTROLLER, Button.kStart.value)
       .whenPressed(new InstantCommand(() -> VisionData.toggle()));
 
-    new JoystickButton(XBOX_CONTROLLER, Button.kBack.value)
-      .whenHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(.6)))
-      .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armPositionRelative(0)));
+    // new JoystickButton(XBOX_CONTROLLER, Button.kBack.value)
+    //   .whenHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(.6)))
+    //   .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armPositionRelative(0)));
 
     // Uptake
     new POVButton(XBOX_CONTROLLER, 0).whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(Constants.MAGAZINE_UP_MOTOR_SPEED), MAGAZINE_SUBSYSTEM))

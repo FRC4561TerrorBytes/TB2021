@@ -130,8 +130,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     new JoystickButton(RIGHT_JOYSTICK, 1)
-      .whileHeld(new IntakeCommand(MAGAZINE_SUBSYSTEM, Constants.INTAKE_MOTOR_SPEED))
-      .whenReleased(new IntakeCommand(MAGAZINE_SUBSYSTEM, Constants.MOTOR_STOP));
+      .whileHeld(new IntakeCommand(MAGAZINE_SUBSYSTEM, Constants.INTAKE_MOTOR_SPEED));
 
     // Right joystick Hood Toggle button 2
     new JoystickButton(RIGHT_JOYSTICK, 2)
@@ -143,7 +142,7 @@ public class RobotContainer {
 
     // new JoystickButton(RIGHT_JOYSTICK, 3)
     //   .whenReleased(new RunCommand(() -> SHOOTER_SUBSYSTEM.flywheelStop(), SHOOTER_SUBSYSTEM));
-      // .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(0), MAGAZINE_SUBSYSTEM));
+    // .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(0), MAGAZINE_SUBSYSTEM));
 
     // Right joystick shoot button 4
     new JoystickButton(RIGHT_JOYSTICK, 4)
@@ -151,15 +150,7 @@ public class RobotContainer {
 
     // Left joystick intake button 1
     new JoystickButton(LEFT_JOYSTICK, 1)
-      .whileHeld(new IntakeCommand(MAGAZINE_SUBSYSTEM, -Constants.OUTTAKE_MOTOR_SPEED))
-      .whenReleased(new IntakeCommand(MAGAZINE_SUBSYSTEM, Constants.MOTOR_STOP));
-    
-    // Right joystick Arm Toggle button 2
-    // new JoystickButton(LEFT_JOYSTICK, 2)
-    //   .whenPressed(new InstantCommand(() -> MAGAZINE_SUBSYSTEM.armSetPosition(-750), MAGAZINE_SUBSYSTEM));
-    new JoystickButton(LEFT_JOYSTICK, 2)
-      .whileHeld(new RunCommand(()-> MAGAZINE_SUBSYSTEM.armManual(0.3), MAGAZINE_SUBSYSTEM))
-      .whenReleased(new InstantCommand(()-> MAGAZINE_SUBSYSTEM.armManual(Constants.MOTOR_STOP), MAGAZINE_SUBSYSTEM));
+      .whileHeld(new IntakeCommand(MAGAZINE_SUBSYSTEM, -Constants.OUTTAKE_MOTOR_SPEED));
 
     // Right joystick turret to 180 button 3
     new JoystickButton(LEFT_JOYSTICK, 3)
@@ -184,42 +175,36 @@ public class RobotContainer {
     new JoystickButton(XBOX_CONTROLLER, 4)
       .whenPressed(new TurretSetpointCommand(SHOOTER_SUBSYSTEM, Constants.TURRET_STRAIGHT_POSITION, TURRET_SETPOINT_VISION_INTERRUPT));
 
-    new JoystickButton(XBOX_CONTROLLER, Button.kBumperLeft.value)
-      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(-0.4), MAGAZINE_SUBSYSTEM));
-
-    new JoystickButton(XBOX_CONTROLLER, Button.kBumperRight.value)
-      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(0.4), MAGAZINE_SUBSYSTEM));
-
     // Vision toggle
     VisionData.setEnabled(false);
     new JoystickButton(XBOX_CONTROLLER, Button.kStart.value)
       .whenPressed(new InstantCommand(() -> VisionData.toggle()));
 
-    // new JoystickButton(XBOX_CONTROLLER, Button.kBack.value)
-    //   .whenHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(.6)))
-    //   .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armPositionRelative(0)));
-
     // Uptake
     new POVButton(XBOX_CONTROLLER, 0).whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(Constants.MAGAZINE_UP_MOTOR_SPEED), MAGAZINE_SUBSYSTEM))
       .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptakeStop()));
-    // new POVButton(XBOX_CONTROLLER, 0).whileHeld(new UptakeCommand(MAGAZINE_SUBSYSTEM))
-    //   .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptakeStop()));
 
     new POVButton(XBOX_CONTROLLER, 180).whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(-Constants.MAGAZINE_DOWN_MOTOR_SPEED), MAGAZINE_SUBSYSTEM))
       .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptakeStop()));
 
-    /*
+    new POVButton(XBOX_CONTROLLER, 90)
+      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(-0.4), MAGAZINE_SUBSYSTEM))
+      .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(0), MAGAZINE_SUBSYSTEM));
+
+    new POVButton(XBOX_CONTROLLER, 270)
+      .whileHeld(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(0.4), MAGAZINE_SUBSYSTEM))
+      .whenReleased(new RunCommand(() -> MAGAZINE_SUBSYSTEM.armManual(0), MAGAZINE_SUBSYSTEM));
+
+    
     // Controller mouse droid left/right button 5 // TODO: change to left or right
     // new JoystickButton(XBOX_CONTROLLER, 5)
     //   .whenHeld(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(Constants.MOUSE_DROID_SPEED), CLIMBER_SUBSYSTEM))
     //   .whenReleased(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(Constants.MOTOR_STOP), CLIMBER_SUBSYSTEM));
 
     // Controller mouse droid left/right button 6 // TODO: change to left or right
-    new JoystickButton(XBOX_CONTROLLER, 6)
-      .whenHeld(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(-Constants.MOUSE_DROID_SPEED), CLIMBER_SUBSYSTEM))
-      .whenReleased(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(Constants.MOTOR_STOP), CLIMBER_SUBSYSTEM));;
-
-    */
+    // new JoystickButton(XBOX_CONTROLLER, 6)
+    //   .whenHeld(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(-Constants.MOUSE_DROID_SPEED), CLIMBER_SUBSYSTEM))
+    //   .whenReleased(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(Constants.MOTOR_STOP), CLIMBER_SUBSYSTEM));;
 
     // Controller turret left, trigger left
     new Trigger(() -> (XBOX_CONTROLLER.getTriggerAxis(Hand.kLeft) > Constants.DEADBAND))

@@ -51,8 +51,10 @@ public class MagazineSubsystem extends SubsystemBase {
    */
   public MagazineSubsystem(TalonPIDConfig config) {
     this.config = config;
-    this.config.initializeTalonPID(ARM_MOTOR, FeedbackDevice.None, false, true);
-    // ARM_MOTOR.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.NormallyOpen);
+    //this.config.initializeTalonPID(ARM_MOTOR, FeedbackDevice.None, false, true);
+    //ARM_MOTOR.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.NormallyOpen);
+
+    ARM_MOTOR.configFactoryDefault();
 
     // ARM_MOTOR.setSelectedSensorPosition(Constants.ARM_TOP_POSITION);
     // this.armSetPosition(Constants.ARM_TOP_POSITION);

@@ -117,12 +117,12 @@ public class ShooterSubsystem extends SubsystemBase {
      // Prints debug statements on SmartDashboard
      if (Constants.SHOOTER_DEBUG) {
       ShuffleboardTab tab = Shuffleboard.getTab(this.SUBSYSTEM_NAME);
+      Shuffleboard.getTab("SmartDashboard").addBoolean("Flywheel at Speed?", () -> isFlywheelAtSpeed());
       tab.addNumber("Flywheel Motor Output", () -> Flywheel.MASTER_MOTOR.getMotorOutputPercent());
       tab.addNumber("Flywheel Current", () -> Flywheel.MASTER_MOTOR.getSupplyCurrent());
       tab.addNumber("Flywheel Motor Velocity", () -> Flywheel.ticksToRPM(Flywheel.MASTER_MOTOR.getSelectedSensorVelocity()));
       tab.addNumber("Flywheel Motor Setpoint", () -> Flywheel.ticksToRPM(Flywheel.MASTER_MOTOR.getClosedLoopTarget()));
       tab.addNumber("Flywheel Error", () -> flywheelError());
-      tab.addBoolean("Flywheel at Speed?", () -> isFlywheelAtSpeed());
 
       tab.addNumber("Hood Motor Output", () -> Hood.MOTOR.getMotorOutputPercent());
       tab.addNumber("Hood Motor Current", () -> Hood.MOTOR.getSupplyCurrent());

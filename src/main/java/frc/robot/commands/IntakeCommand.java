@@ -32,7 +32,7 @@ public class IntakeCommand extends CommandBase {
   @Override
   public void execute() {
     subsystem.intakeMotorSpeed(this.speed);
-    subsystem.armManual(0.1);
+    subsystem.armManual(0.05);
   }
 
   // Called once the command ends or is interrupted.

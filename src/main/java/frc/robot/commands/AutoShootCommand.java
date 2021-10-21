@@ -8,10 +8,11 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.MagazineSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
-public class ShootCommand extends CommandBase {
+public class AutoShootCommand extends CommandBase {
   ShooterSubsystem shooterSubsystem;
   MagazineSubsystem magazineSubsystem;
   double speed;
@@ -19,9 +20,10 @@ public class ShootCommand extends CommandBase {
   /**
    * Creates a new ShootCommand.
    */
-  public ShootCommand(ShooterSubsystem shooterSubsystem, double speed) {
+  public AutoShootCommand(ShooterSubsystem shooterSubsystem, MagazineSubsystem magazineSubsystem, double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooterSubsystem = shooterSubsystem;
+    this.magazineSubsystem = magazineSubsystem;
     this.speed = speed;
 
     addRequirements(this.shooterSubsystem);
@@ -36,12 +38,22 @@ public class ShootCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (this.shooterSubsystem.isFlywheelAtSpeed()) {
+      this.magazineSubsystem.ballUptake(Constants.MAGAZINE_UP_MOTOR_SPEED);
+      System.out.println("RUNNING MAGAZINE");
+    }
+
+    else {
+      this.magazineSubsystem.ballUptakeStop();
+      System.out.println("STOPPING...");
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     this.shooterSubsystem.flywheelStop();
+    this.magazineSubsystem.ballUptakeStop();
   }
 
   // Returns true when the command should end.

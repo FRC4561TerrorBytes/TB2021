@@ -35,7 +35,7 @@ public class TrenchSixBallAuto extends SequentialCommandGroup {
     super(
       new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_SIXBALL_POSITION, false),
       new InstantCommand(() -> shooterSubsystem.toggleHoodPosition(), shooterSubsystem),
-      new ShootCommand(shooterSubsystem, magazineSubsystem, 5400).withTimeout(3),
+      new ShootCommand(shooterSubsystem, 5400).withTimeout(3),
       new RunCommand(() -> magazineSubsystem.intakeMotorSpeed(Constants.INTAKE_MOTOR_SPEED), magazineSubsystem).alongWith(
         new AutoTrajectory(driveSubsystem, AutoModePaths.TrenchSixBallPt1, false).getCommand()
       ).withTimeout(5),
@@ -43,7 +43,7 @@ public class TrenchSixBallAuto extends SequentialCommandGroup {
       new RunCommand(() -> magazineSubsystem.intakeMotorSpeed(Constants.MOTOR_STOP), magazineSubsystem).withTimeout(0),
       new AutoTrajectory(driveSubsystem, AutoModePaths.TrenchSixBallPt2, true).getCommand(),
       new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_BACK_LIMIT_POSITION, false),
-      new ShootCommand(shooterSubsystem, magazineSubsystem, 5400).withTimeout(3),
+      new ShootCommand(shooterSubsystem, 5400).withTimeout(3),
       new InstantCommand(()-> shooterSubsystem.toggleHoodPosition(), shooterSubsystem),
       new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_FRONT_LIMIT_POSITION, false)
     );

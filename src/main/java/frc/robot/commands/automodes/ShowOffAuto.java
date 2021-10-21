@@ -37,7 +37,7 @@ public class ShowOffAuto extends SequentialCommandGroup {
       new InstantCommand(() -> VisionData.setEnabled(true)),
       new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_BACK_POSITION, true),
       new InstantCommand(() -> shooterSubsystem.toggleHoodPosition(), shooterSubsystem),
-      new ShootCommand(shooterSubsystem, magazineSubsystem, 5400).withTimeout(12),
+      new ShootCommand(shooterSubsystem, 5400).withTimeout(12),
       new InstantCommand(() -> VisionData.setEnabled(false)),
       new AutoTrajectory(driveSubsystem, AutoModePaths.ShowOffOne, false).getCommand(),
       new RunCommand(() -> magazineSubsystem.intakeMotorSpeed(Constants.INTAKE_MOTOR_SPEED), magazineSubsystem).withTimeout(7).alongWith(
@@ -47,7 +47,7 @@ public class ShowOffAuto extends SequentialCommandGroup {
       new AutoTrajectory(driveSubsystem, AutoModePaths.ShowOffThree, true).getCommand(),
       new InstantCommand(() -> VisionData.setEnabled(true)),
       new InstantCommand(()-> shooterSubsystem.relativeMoveTurretPID(600)),
-      new ShootCommand(shooterSubsystem, magazineSubsystem, 5400).withTimeout(12),
+      new ShootCommand(shooterSubsystem, 5400).withTimeout(12),
       new InstantCommand(() -> VisionData.setEnabled(false)),
       new InstantCommand(()-> shooterSubsystem.toggleHoodPosition(), shooterSubsystem),
       new TurretSetpointCommand(shooterSubsystem, Constants.TURRET_FRONT_LIMIT_POSITION, false)

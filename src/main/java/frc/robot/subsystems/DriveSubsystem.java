@@ -7,6 +7,12 @@
 
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -50,9 +56,9 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER; //2.149e-5
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
   private final double DRIVETRAIN_EFFICIENCY = 0.85;
-  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY;
-  private final double OPTIMAL_SLIP_RATIO = 0.05;
-  private final double INERTAL_VELOCITY_THRESHOLD = 0.0005;
+  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY; //3.966 m/s
+  private final double OPTIMAL_SLIP_RATIO = 0.03;
+  private final double INERTAL_VELOCITY_THRESHOLD = 0.005;
   private final int INERTIAL_VELOCITY_WINDOW_SIZE = 50;
   private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
 
@@ -71,6 +77,8 @@ public class DriveSubsystem extends PIDSubsystem {
 
   private boolean was_turning = false;
 
+  private HashMap<Double, Double> tractionControlMap = new HashMap<Double, Double>();
+
   //Odometry class for tracking robot pose
   private final DifferentialDriveOdometry odometry;
 
@@ -86,7 +94,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @param turn_scalar Turn sensitivity
    * @param deadband Deadzone for joystick
    */
-  public DriveSubsystem(double kP, double kD, double tolerance, double turn_scalar, double deadband) {
+  public DriveSubsystem(double kP, double kD, double tolerance, double turn_scalar, double deadband, String tractionControlCurve) {
       // The PIDController used by the subsystem
       super(new PIDController(kP, 0, kD));
 
@@ -116,9 +124,16 @@ public class DriveSubsystem extends PIDSubsystem {
       LEFT_MASTER_MOTOR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
       RIGHT_MASTER_MOTOR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
-      // Wait for NAVX init before finishing DriveSubsystem init
-      try { Thread.sleep(3000); }
-      catch (Exception e) { e.printStackTrace(); }
+      ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+      for (int i = 0; i < MAX_LINEAR_SPEED * 1000; i++) {
+        double key = (double)i / 1000;
+        try {
+          double value = (double)jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key)));
+          tractionControlMap.put(key, value);
+        } catch (ScriptException e) {
+          e.printStackTrace();
+        }
+      }
 
       // Initialise PID subsystem setpoint and input
       this.resetAngle();
@@ -157,30 +172,14 @@ public class DriveSubsystem extends PIDSubsystem {
   @Override
   public void useOutput(double output, double setpoint) {
     // Use the output here
+    // Truncate values to 3 decimal places
+    double inertialVelocity = Math.floor(this.getInertialVelocity() * 1000) / 1000;
+    // Calculate optimal speed based on optimal slip ratio
+    double optimalMotorOutput = (inertialVelocity != 0) ? 
+                          tractionControlMap.get(inertialVelocity) : 
+                          this.OPTIMAL_SLIP_RATIO * this.speed;
 
-    // Apply basic traction control when going straight
-    if (!this.was_turning) {
-      // Get average linear wheel speeds
-      DifferentialDriveWheelSpeeds wheelSpeeds = this.getWheelSpeeds();
-      double averageWheelSpeed = Math.abs((wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2);
-      double inertialVelocity = this.getInertialVelocity();
-
-      // Get current slip ratio, ignoring slip when wheels are "under" speed
-      double currentSlipRatio = (averageWheelSpeed > inertialVelocity) ?
-																(averageWheelSpeed - inertialVelocity) / averageWheelSpeed :
-																0;
-
-      // If current slip ratio is greater than optimal then wheel is slipping excessively
-      if (currentSlipRatio >= this.OPTIMAL_SLIP_RATIO) {
-				// Calculate optimal speed based on optimal slip ratio
-				double optimalSpeed = (inertialVelocity != 0) ? 
-															(-inertialVelocity / (this.OPTIMAL_SLIP_RATIO - 1)) / this.MAX_LINEAR_SPEED : 
-															(this.OPTIMAL_SLIP_RATIO * this.speed);
-        this.setSpeed(Math.copySign(optimalSpeed, this.speed));
-      }
-    }
-
-    this.drivetrain.arcadeDrive(this.speed, -output, false);
+    this.drivetrain.arcadeDrive(optimalMotorOutput, -output, false);
   }
 
   @Override
@@ -351,7 +350,7 @@ public class DriveSubsystem extends PIDSubsystem {
     this.inertialVelocitySum = this.inertialVelocitySum - this.INERTIAL_VELOCITY_READINGS[this.inertialVelocityIndex];
 
     // Get latest reading from NAVX
-    double latestReading = Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2));
+    double latestReading = Math.min(Math.sqrt(Math.pow(NAVX.getVelocityX(), 2) + Math.pow(NAVX.getVelocityY(), 2)), MAX_LINEAR_SPEED);
 
     // Add latest reading to array
     this.INERTIAL_VELOCITY_READINGS[this.inertialVelocityIndex] = latestReading;

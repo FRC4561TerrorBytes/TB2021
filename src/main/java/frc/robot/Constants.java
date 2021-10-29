@@ -22,10 +22,10 @@ package frc.robot;
 public final class Constants {
 
     // Show Debug
-    public static final boolean DRIVE_DEBUG = true;
-    public static final boolean SHOOTER_DEBUG = true;
-    public static final boolean MAGAZINE_DEBUG = true;
-    public static final boolean CLIMBER_DEBUG = true;
+    public static final boolean DRIVE_DEBUG = false;
+    public static final boolean SHOOTER_DEBUG = false;
+    public static final boolean MAGAZINE_DEBUG = false;
+    public static final boolean CLIMBER_DEBUG = false;
     
     // Robot tick rate in seconds
     public static final double ROBOT_TICK_RATE = 1 / 60;

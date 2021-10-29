@@ -56,7 +56,7 @@ import frc.robot.subsystems.ShooterSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(Constants.DRIVE_kP, Constants.DRIVE_kD, 
+  private final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(), Constants.DRIVE_kP, Constants.DRIVE_kD, 
     Constants.DRIVE_TOLERANCE, Constants.DRIVE_TURN_SCALAR, Constants.DEADBAND, Constants.DRIVE_TRACTION_CONTROL_CURVE);
   private static final ClimberSubsystem CLIMBER_SUBSYSTEM = new ClimberSubsystem();
 

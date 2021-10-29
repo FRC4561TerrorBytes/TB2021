@@ -55,8 +55,8 @@ public class DriveSubsystem extends PIDSubsystem {
   private final double TICKS_PER_METER = (double)(TICKS_PER_ROTATION * GEAR_RATIO) * (double)(1 / (WHEEL_DIAMETER_METERS * Math.PI)); //46644.183
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER; //2.149e-5
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
-  private final double DRIVETRAIN_EFFICIENCY = 0.85;
-  private final double MAX_LINEAR_SPEED = (MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY; //3.966 m/s
+  private final double DRIVETRAIN_EFFICIENCY = 0.88;
+  private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //3.966 m/s
   private final double OPTIMAL_SLIP_RATIO = 0.03;
   private final double INERTAL_VELOCITY_THRESHOLD = 0.005;
   private final int INERTIAL_VELOCITY_WINDOW_SIZE = 50;
@@ -93,6 +93,7 @@ public class DriveSubsystem extends PIDSubsystem {
    * @param tolerance Allowed closed loop error (degrees)
    * @param turn_scalar Turn sensitivity
    * @param deadband Deadzone for joystick
+   * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    */
   public DriveSubsystem(double kP, double kD, double tolerance, double turn_scalar, double deadband, String tractionControlCurve) {
       // The PIDController used by the subsystem

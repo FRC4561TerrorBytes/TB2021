@@ -30,8 +30,6 @@ import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.MoveTurretManualCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TurretSetpointCommand;
-//import frc.robot.commands.UptakeCommand;
-import frc.robot.commands.automodes.BarrelAuto;
 import frc.robot.commands.automodes.BarrelContinuous;
 import frc.robot.commands.automodes.BounceAuto;
 import frc.robot.commands.automodes.PathABlueAuto;
@@ -56,13 +54,13 @@ import frc.robot.subsystems.ShooterSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(), Constants.DRIVE_kP, Constants.DRIVE_kD, 
+  private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(), Constants.DRIVE_kP, Constants.DRIVE_kD, 
     Constants.DRIVE_TOLERANCE, Constants.DRIVE_TURN_SCALAR, Constants.DEADBAND, Constants.DRIVE_TRACTION_CONTROL_CURVE);
   private static final ClimberSubsystem CLIMBER_SUBSYSTEM = new ClimberSubsystem();
 
   public static final MagazineSubsystem MAGAZINE_SUBSYSTEM = new MagazineSubsystem(MagazineSubsystem.initializeHardware(), Constants.ARM_CONFIG);
 
-  private static final ShooterSubsystem SHOOTER_SUBSYSTEM = new ShooterSubsystem(Constants.FLYWHEEL_MASTER_CONFIG,
+  private static final ShooterSubsystem SHOOTER_SUBSYSTEM = new ShooterSubsystem(ShooterSubsystem.initializeHardware(), Constants.FLYWHEEL_MASTER_CONFIG,
       Constants.HOOD_CONFIG, Constants.TURRET_CONFIG);
 
 
@@ -77,7 +75,6 @@ public class RobotContainer {
   public static UsbCamera camera2;
 
 
-  //  private static SendableChooser<Command> chooser = new SendableChooser<>();
   private static SendableChooser<SequentialCommandGroup> chooser = new SendableChooser<>();
 
 

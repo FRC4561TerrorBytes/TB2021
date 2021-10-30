@@ -17,4 +17,4 @@ jobs:
       run: chmod +x gradlew
 
     - name: Compile and run tests on robot code
-      run: ./gradlew build
+      run: ./gradlew build -Dnashorn.args=--no-deprecation-warning

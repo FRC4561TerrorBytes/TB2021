@@ -1,6 +1,17 @@
 {
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
+  "java.test.config": [
+    {
+        "name": "WPIlibUnitTests",
+        "workingDirectory": "${workspaceFolder}/build/tmp/jniExtractDir",
+        "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/tmp/jniExtractDir", "-Dnashorn.args=--no-deprecation-warning" ],
+        "env": { "LD_LIBRARY_PATH": "${workspaceFolder}/build/tmp/jniExtractDir" ,
+          "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/tmp/jniExtractDir" }
+        
+    },
+  ],
+  "java.test.defaultConfig": "WPIlibUnitTests",
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,

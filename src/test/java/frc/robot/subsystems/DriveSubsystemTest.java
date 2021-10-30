@@ -1,11 +1,19 @@
 package frc.robot.subsystems;
 
-import static org.mockito.Mockito.*;
-import org.mockito.*;
-import org.junit.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.AdditionalMatchers;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.Counter;
@@ -13,7 +21,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants;
 
 public class DriveSubsystemTest {
-  public static final double DELTA = 1e-2;
+  public static final double DELTA = 5e-3;
   private DifferentialDrive m_drivetrain;
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
@@ -26,7 +34,7 @@ public class DriveSubsystemTest {
   private Counter m_lidar;
   private AHRS m_navx;
 
-  @Before
+  @BeforeEach
   public void setup() {
     assert HAL.initialize(500, 0);
 
@@ -54,21 +62,18 @@ public class DriveSubsystemTest {
                                           Constants.DRIVE_TRACTION_CONTROL_CURVE);
   }
 
-  // Close out hardware to prevent one test from causing subsequent tests to fail
-  @After
+  @AfterEach
   public void close() {
     m_driveSubsystem.close();
     m_driveSubsystem = null;
   }
 
-  /**
-   * Test if robot can move forward using PID drive
-   */
   @Test
-  public void goingForward() {
-    // Hardcode NAVX sensor return value for angle, velocityX, and velocityY
+  @DisplayName("Test if robot can move forward using PID drive")
+  public void forward() {
+    // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
-    when(m_navx.getVelocityX()).thenReturn((float)3.966);
+    when(m_navx.getVelocityX()).thenReturn((float)4.106);
     when(m_navx.getVelocityY()).thenReturn((float)0.0);
 
     // Fill up velocity moving average buffer by calling periodic
@@ -78,13 +83,60 @@ public class DriveSubsystemTest {
     m_driveSubsystem.teleopPID(1.0, 0.0, 1);
 
     // Verify if arcadeDrive method was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(1.0, DELTA), AdditionalMatchers.eq(0.0, 0.0), eq(false));
+    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(1.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
   }
 
-  /**
-   * Test if robot can turn left using PID drive
-   */
   @Test
+  @DisplayName("Test if robot can move in reverse using PID drive")
+  public void reverse() {
+    // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
+    when(m_navx.getAngle()).thenReturn(0.0);
+    when(m_navx.getVelocityX()).thenReturn((float)4.106);
+    when(m_navx.getVelocityY()).thenReturn((float)0.0);
+
+    // Fill up velocity moving average buffer by calling periodic
+    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+
+    // Try to drive in reverse
+    m_driveSubsystem.teleopPID(-1.0, 0.0, 1);
+
+    // Verify if arcadeDrive method was called with expected values
+    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(-1.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+  }
+
+  @Test
+  @DisplayName("Test if robot can stop using PID drive")
+  public void stop() {
+    // Hardcode NAVX sensor return value for angle
+    when(m_navx.getAngle()).thenReturn(0.0);
+
+    // Try to stop
+    m_driveSubsystem.teleopPID(0.0, 0.0, 1);
+
+    // Verify if arcadeDrive method was called with expected values
+    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+  }
+
+  @Test
+  @DisplayName("Test if robot ignores small turn in put values under threshold")
+  public void ignoreSmallTurnInput() {
+    // Hardcode NAVX sensor return values for angle, velocityX, velocityY
+    when(m_navx.getAngle()).thenReturn(0.0);
+    when(m_navx.getVelocityX()).thenReturn((float)4.106);
+    when(m_navx.getVelocityY()).thenReturn((float)0.0);
+
+    // Fill up velocity moving average buffer by calling periodic
+    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+
+    // Try to drive with small turn value
+    m_driveSubsystem.teleopPID(1.0, 0.001, 1);
+
+    // Verify if arcadeDrive method was called with expected values
+    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(1.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+  }
+
+  @Test
+  @DisplayName("Test if robot can turn left using PID drive")
   public void turningLeft() {
     // Hardcode NAVX sensor return value for angle
     when(m_navx.getAngle()).thenReturn(0.0);
@@ -96,10 +148,8 @@ public class DriveSubsystemTest {
     verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.0, 0.0), AdditionalMatchers.gt(0.0), eq(false));
   }
 
-  /**
-   * Test if robot can turn right using PID drive
-   */
   @Test
+  @DisplayName("Test if robot can turn right using PID drive")
   public void turningRight() {
     // Hardcode NAVX sensor return value for angle
     when(m_navx.getAngle()).thenReturn(0.0);
@@ -111,10 +161,8 @@ public class DriveSubsystemTest {
     verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.0, 0.0), AdditionalMatchers.lt(0.0), eq(false));
   }
 
-  /**
-   * Test if robot will limit wheel slip
-   */
   @Test
+  @DisplayName("Test if robot will limit wheel slip")
   public void tractionControl() {
     // Hardcode NAVX sensor values for velocityX, velocityY
     when(m_navx.getVelocityX()).thenReturn((float)0.0);

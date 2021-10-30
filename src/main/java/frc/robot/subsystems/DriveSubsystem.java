@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.Constants;
 
 
@@ -104,7 +105,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double METERS_PER_TICK = 1 / TICKS_PER_METER; //2.149e-5
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
   private final double DRIVETRAIN_EFFICIENCY = 0.88;
-  private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //3.966 m/s
+  private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //4.106 m/s
   private final double OPTIMAL_SLIP_RATIO = 0.03;
   private final double INERTAL_VELOCITY_THRESHOLD = 0.005;
   private final int INERTIAL_VELOCITY_WINDOW_SIZE = 50;
@@ -191,6 +192,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
         double key = (double)i / 1000;
         try {
           double value = (double)jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key)));
+          value = MathUtil.clamp(value, 0, 1.0);
           m_tractionControlMap.put(key, value);
         } catch (ScriptException e) {
           e.printStackTrace();
@@ -301,6 +303,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double optimalMotorOutput = (inertialVelocity != 0) ? 
                           m_tractionControlMap.get(inertialVelocity) : 
                           OPTIMAL_SLIP_RATIO * m_speed;
+    optimalMotorOutput = Math.copySign(optimalMotorOutput, speed);
 
     this.m_drivetrain.arcadeDrive(optimalMotorOutput, -output, false);
   }

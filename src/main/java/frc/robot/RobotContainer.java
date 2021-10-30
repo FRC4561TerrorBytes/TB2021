@@ -60,7 +60,7 @@ public class RobotContainer {
     Constants.DRIVE_TOLERANCE, Constants.DRIVE_TURN_SCALAR, Constants.DEADBAND, Constants.DRIVE_TRACTION_CONTROL_CURVE);
   private static final ClimberSubsystem CLIMBER_SUBSYSTEM = new ClimberSubsystem();
 
-  public static final MagazineSubsystem MAGAZINE_SUBSYSTEM = new MagazineSubsystem(Constants.ARM_CONFIG);
+  public static final MagazineSubsystem MAGAZINE_SUBSYSTEM = new MagazineSubsystem(MagazineSubsystem.initializeHardware(), Constants.ARM_CONFIG);
 
   private static final ShooterSubsystem SHOOTER_SUBSYSTEM = new ShooterSubsystem(Constants.FLYWHEEL_MASTER_CONFIG,
       Constants.HOOD_CONFIG, Constants.TURRET_CONFIG);

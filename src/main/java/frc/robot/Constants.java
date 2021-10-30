@@ -34,7 +34,7 @@ public final class Constants {
     public static final double DRIVE_kP = 0.018; //0.018
     public static final double DRIVE_kD = 0.00029; //0.00029
     public static final double DRIVE_PERIOD_SECONDS = 1 / 50;
-    public static final double DRIVE_TURN_SCALAR = 20.0;
+    public static final double DRIVE_TURN_SCALAR = 60.0;
     public static final double DRIVE_TOLERANCE = 0.25;
     public static final String DRIVE_TRACTION_CONTROL_CURVE = "X / 4";
     public static final int DRIVE_RESPONSE_EXPONENT = 1;

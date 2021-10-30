@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMax;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 
@@ -44,6 +45,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(1)
   @DisplayName("Test if robot can intake")
   public void intake() {
     // Trey to intake
@@ -54,6 +56,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(2)
   @DisplayName("Test if robot can outtake")
   public void outtake() {
     // Try to outtake
@@ -64,6 +67,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(3)
   @DisplayName("Test if robot can stop intake")
   public void intakeStop() {
     // Try to stop intake
@@ -74,6 +78,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(4)
   @DisplayName("Test if robot can raise arm")
   public void raiseArm() {
     // Try to raise arm
@@ -84,6 +89,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(5)
   @DisplayName("Test if robot can lower arm")
   public void lowerArm() {
     // Try to lower arm
@@ -94,6 +100,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(6)
   @DisplayName("Test if robot can uptake")
   public void uptake() {
     // Try to uptake
@@ -104,6 +111,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(7)
   @DisplayName("Test if robot can downtake")
   public void downtake() {
     // Try to downtake
@@ -114,6 +122,7 @@ public class MagazineSubsystemTest {
   }
 
   @Test
+  @Order(8)
   @DisplayName("Test if robot can stop uptake")
   public void stopUptake() {
     // Try to stop uptake

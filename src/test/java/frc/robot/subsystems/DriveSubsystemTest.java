@@ -12,6 +12,7 @@ import com.kauailabs.navx.frc.AHRS;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 
@@ -69,6 +70,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(1)
   @DisplayName("Test if robot can move forward using PID drive")
   public void forward() {
     // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
@@ -87,6 +89,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(2)
   @DisplayName("Test if robot can move in reverse using PID drive")
   public void reverse() {
     // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
@@ -105,6 +108,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(3)
   @DisplayName("Test if robot can stop using PID drive")
   public void stop() {
     // Hardcode NAVX sensor return value for angle
@@ -118,6 +122,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(4)
   @DisplayName("Test if robot ignores small turn in put values under threshold")
   public void ignoreSmallTurnInput() {
     // Hardcode NAVX sensor return values for angle, velocityX, velocityY
@@ -136,6 +141,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(5)
   @DisplayName("Test if robot can turn left using PID drive")
   public void turningLeft() {
     // Hardcode NAVX sensor return value for angle
@@ -149,6 +155,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(6)
   @DisplayName("Test if robot can turn right using PID drive")
   public void turningRight() {
     // Hardcode NAVX sensor return value for angle
@@ -162,6 +169,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Order(7)
   @DisplayName("Test if robot will limit wheel slip")
   public void tractionControl() {
     // Hardcode NAVX sensor values for velocityX, velocityY

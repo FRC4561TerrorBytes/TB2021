@@ -279,6 +279,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     speed = Math.copySign(Math.pow(speed, power), speed);
     turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
 
+    double angle = getAngle();
+
     // Set drive speed if it is more than the deadband
     if (Math.abs(speed) >= m_deadband) setSpeed(speed);
     else setSpeed(0.0);
@@ -286,17 +288,17 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= m_deadband) {
       // Add delta to setpoint scaled by factor
-      m_drivePIDController.setSetpoint(getAngle() + (turn_request * m_turnScalar));
+      m_drivePIDController.setSetpoint(angle + (turn_request * m_turnScalar));
       m_wasTurning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
       if (m_wasTurning) {
-        m_drivePIDController.setSetpoint(getAngle());
+        m_drivePIDController.setSetpoint(angle);
         m_wasTurning = false;
       }
     }
 
-    double output = m_drivePIDController.calculate(getAngle(), m_drivePIDController.getSetpoint());
+    double output = m_drivePIDController.calculate(angle, m_drivePIDController.getSetpoint());
     // Truncate values to 3 decimal places
     double inertialVelocity = Math.floor(getInertialVelocity() * 1000) / 1000;
     // Calculate optimal speed based on optimal slip ratio

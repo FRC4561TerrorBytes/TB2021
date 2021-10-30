@@ -37,12 +37,12 @@ import frc.robot.Constants;
 public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   public static class Hardware {
-    public DifferentialDrive drivetrain;
-    public WPI_TalonFX leftMasterMotor, rightMasterMotor;
-    public WPI_TalonFX leftSlaveMotor, rightSlaveMotor;
+    private DifferentialDrive drivetrain;
+    private WPI_TalonFX leftMasterMotor, rightMasterMotor;
+    private WPI_TalonFX leftSlaveMotor, rightSlaveMotor;
 
-    public Counter lidar;
-    public AHRS navx;
+    private Counter lidar;
+    private AHRS navx;
 
     public Hardware(WPI_TalonFX leftMasterMotor, 
                     WPI_TalonFX rightMasterMotor, 

@@ -172,7 +172,8 @@ public class DriveSubsystemTest {
   @Order(7)
   @DisplayName("Test if robot will limit wheel slip")
   public void tractionControl() {
-    // Hardcode NAVX sensor values for velocityX, velocityY
+    // Hardcode NAVX sensor values for angle, velocityX, and velocityY
+    when(m_navx.getAngle()).thenReturn(0.0);
     when(m_navx.getVelocityX()).thenReturn((float)0.0);
     when(m_navx.getVelocityY()).thenReturn((float)0.0);
 

@@ -158,6 +158,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
        
       this.m_drivetrain = drivetrainHardware.drivetrain;
 
+      this.m_turnScalar = turn_scalar;
+      this.m_deadband = deadband;
+
       // Disable built in deadband application
       this.m_drivetrain.setDeadband(0);
 
@@ -211,9 +214,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0));
       resetOdometry();
 
-      this.m_turnScalar = turn_scalar;
-      this.m_deadband = deadband;
-
       // Configure LIDAR settings
       m_lidar.setMaxPeriod(1.00); //set the max period that can be measured
       m_lidar.setSemiPeriodMode(true); //Set the counter to period measurement
@@ -247,7 +247,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void periodic() {
-    this.updateInertialVelocity();
+    updateInertialVelocity();
     
     // Update the odometry in the periodic block
     // Negate gyro angle because gyro is positive going clockwise which doesn't match WPILib convention
@@ -266,7 +266,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     speed = Math.copySign(Math.pow(speed, power), speed);
     turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
 
-    this.m_drivetrain.curvatureDrive(speed, -turn_request, true);
+    m_drivetrain.curvatureDrive(speed, -turn_request, true);
 	}
 
   /**
@@ -281,7 +281,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Set drive speed if it is more than the deadband
     if (Math.abs(speed) >= m_deadband) setSpeed(speed);
-    else this.stop();
+    else setSpeed(0.0);
 
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= m_deadband) {
@@ -290,7 +290,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       m_wasTurning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
-      if (this.m_wasTurning) {
+      if (m_wasTurning) {
         m_drivePIDController.setSetpoint(getAngle());
         m_wasTurning = false;
       }
@@ -305,7 +305,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
                           OPTIMAL_SLIP_RATIO * m_speed;
     optimalMotorOutput = Math.copySign(optimalMotorOutput, speed);
 
-    this.m_drivetrain.arcadeDrive(optimalMotorOutput, -output, false);
+    m_drivetrain.arcadeDrive(optimalMotorOutput, -output, false);
   }
 
   /**
@@ -343,7 +343,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param maxOutput
    */
   public void setMaxOutput(double maxOutput) {
-    this.m_drivetrain.setMaxOutput(maxOutput);
+    m_drivetrain.setMaxOutput(maxOutput);
   }
   
   /**
@@ -360,10 +360,10 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry() {
-    this.resetAngle();
+    resetAngle();
     m_leftMasterMotor.setSelectedSensorPosition(0);
     m_rightMasterMotor.setSelectedSensorPosition(0);
-    this.m_odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(0));
+    m_odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(0));
   }
 
   /**
@@ -461,7 +461,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * Stop drivetrain
    */
   public void stop() {
-    this.setSpeed(0);
+    m_drivetrain.arcadeDrive(0.0, 0.0, false);
   }
 
   /**
@@ -469,7 +469,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param speed Desired speed from -1.0 to 1.0
    */
   public void setSpeed(double speed) {
-    this.m_speed = speed;
+    m_speed = speed;
   }
 
   /**
@@ -477,7 +477,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @return Speed
    */
   public double getSpeed() {
-    return this.m_speed;
+    return m_speed;
   }
 
   /**

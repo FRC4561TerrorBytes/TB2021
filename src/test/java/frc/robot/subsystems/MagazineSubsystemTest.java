@@ -46,14 +46,80 @@ public class MagazineSubsystemTest {
   @Test
   @DisplayName("Test if robot can intake")
   public void intake() {
+    // Trey to intake
     m_magazineSubsystem.intakeMotorSpeed(1.0);
+
+    // Verify if intake motor is being set with expected value
     verify(m_intakeMotor, times(1)).set(AdditionalMatchers.eq(1.0, DELTA));
   }
 
   @Test
   @DisplayName("Test if robot can outtake")
   public void outtake() {
+    // Try to outtake
     m_magazineSubsystem.intakeMotorSpeed(-1.0);
+
+    // Verify if intake motor is being set with expected value
     verify(m_intakeMotor, times(1)).set(AdditionalMatchers.eq(-1.0, DELTA));
+  }
+
+  @Test
+  @DisplayName("Test if robot can stop intake")
+  public void intakeStop() {
+    // Try to stop intake
+    m_magazineSubsystem.intakeMotorSpeed(0.0);
+
+    // Verify if intake motor is being set with expected value
+    verify(m_intakeMotor, times(1)).set(AdditionalMatchers.eq(0.0, DELTA));
+  }
+
+  @Test
+  @DisplayName("Test if robot can raise arm")
+  public void raiseArm() {
+    // Try to raise arm
+    m_magazineSubsystem.armManual(1.0);
+
+    // Verify if arm motor is being set with expected value
+    verify(m_armMotor, times(1)).set(AdditionalMatchers.eq(1.0, DELTA));
+  }
+
+  @Test
+  @DisplayName("Test if robot can lower arm")
+  public void lowerArm() {
+    // Try to lower arm
+    m_magazineSubsystem.armManual(-1.0);
+
+    // Verify if arm motor is being set with expected value
+    verify(m_armMotor, times(1)).set(AdditionalMatchers.eq(-1.0, DELTA));
+  }
+
+  @Test
+  @DisplayName("Test if robot can uptake")
+  public void uptake() {
+    // Try to uptake
+    m_magazineSubsystem.ballUptake(1.0);
+
+    // Verify if uptake motor is being set with expected value
+    verify(m_magazineMotor, times(1)).set(AdditionalMatchers.eq(1.0, DELTA));
+  }
+
+  @Test
+  @DisplayName("Test if robot can downtake")
+  public void downtake() {
+    // Try to downtake
+    m_magazineSubsystem.ballUptake(-1.0);
+
+    // Verify if uptake motor is being set with expected value
+    verify(m_magazineMotor, times(1)).set(AdditionalMatchers.eq(-1.0, DELTA));
+  }
+
+  @Test
+  @DisplayName("Test if robot can stop uptake")
+  public void stopUptake() {
+    // Try to stop uptake
+    m_magazineSubsystem.ballUptakeStop();
+
+    // Verify if uptake motor is being set with expected value
+    verify(m_magazineMotor, times(1)).set(AdditionalMatchers.eq(0, DELTA));
   }
 }

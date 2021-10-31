@@ -14,6 +14,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -22,7 +23,6 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
@@ -37,42 +37,22 @@ import frc.robot.Constants;
 public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   public static class Hardware {
-    private DifferentialDrive drivetrain;
-    private WPI_TalonFX leftMasterMotor, rightMasterMotor;
-    private WPI_TalonFX leftSlaveMotor, rightSlaveMotor;
+    private WPI_TalonFX lMasterMotor, rMasterMotor;
+    private WPI_TalonFX lSlaveMotor, rSlaveMotor;
 
     private Counter lidar;
     private AHRS navx;
 
-    public Hardware(WPI_TalonFX leftMasterMotor, 
-                    WPI_TalonFX rightMasterMotor, 
-                    WPI_TalonFX leftSlaveMotor,
-                    WPI_TalonFX rightSlaveMotor, 
+    public Hardware(WPI_TalonFX lMasterMotor, 
+                    WPI_TalonFX rMasterMotor, 
+                    WPI_TalonFX lSlaveMotor,
+                    WPI_TalonFX rSlaveMotor, 
                     Counter lidar,
                     AHRS navx) {
-      this.leftMasterMotor = leftMasterMotor;
-      this.rightMasterMotor = rightMasterMotor;
-      this.leftSlaveMotor = leftSlaveMotor;
-      this.rightSlaveMotor = rightSlaveMotor;
-
-      this.lidar = lidar;
-      this.navx = navx;
-
-      this.drivetrain = new DifferentialDrive(leftMasterMotor, rightMasterMotor);
-    }
-
-    public Hardware(DifferentialDrive drivetrain,
-                    WPI_TalonFX leftMasterMotor, 
-                    WPI_TalonFX rightMasterMotor, 
-                    WPI_TalonFX leftSlaveMotor,
-                    WPI_TalonFX rightSlaveMotor, 
-                    Counter lidar,
-                    AHRS navx) {
-      this.drivetrain = drivetrain;
-      this.leftMasterMotor = leftMasterMotor;
-      this.rightMasterMotor = rightMasterMotor;
-      this.leftSlaveMotor = leftSlaveMotor;
-      this.rightSlaveMotor = rightSlaveMotor;
+      this.lMasterMotor = lMasterMotor;
+      this.rMasterMotor = rMasterMotor;
+      this.lSlaveMotor = lSlaveMotor;
+      this.rSlaveMotor = rSlaveMotor;
 
       this.lidar = lidar;
       this.navx = navx;
@@ -81,16 +61,13 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   private String SUBSYSTEM_NAME = "Drive Subsystem";
 
-  private ShuffleboardTab m_shuffleboardTab;
-
-  private DifferentialDrive m_drivetrain;
   private PIDController m_drivePIDController;
 
-  private WPI_TalonFX m_leftMasterMotor;
-  private WPI_TalonFX m_leftSlaveMotor;
+  private WPI_TalonFX m_lMasterMotor;
+  private WPI_TalonFX m_lSlaveMotor;
 
-  private WPI_TalonFX m_rightMasterMotor;
-  private WPI_TalonFX m_rightSlaveMotor;
+  private WPI_TalonFX m_rMasterMotor;
+  private WPI_TalonFX m_rSlaveMotor;
 
   private AHRS m_navx;
 
@@ -147,48 +124,42 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       // The PIDController used by the subsystem
       m_drivePIDController = new PIDController(kP, 0, kD);
 
-      this.m_leftMasterMotor = drivetrainHardware.leftMasterMotor;
-      this.m_rightMasterMotor = drivetrainHardware.rightMasterMotor;
-      this.m_leftSlaveMotor = drivetrainHardware.leftSlaveMotor;
-      this.m_rightSlaveMotor = drivetrainHardware.rightSlaveMotor;
+      this.m_lMasterMotor = drivetrainHardware.lMasterMotor;
+      this.m_rMasterMotor = drivetrainHardware.rMasterMotor;
+      this.m_lSlaveMotor = drivetrainHardware.lSlaveMotor;
+      this.m_rSlaveMotor = drivetrainHardware.rSlaveMotor;
 
       this.m_lidar = drivetrainHardware.lidar;
       this.m_navx = drivetrainHardware.navx;
 
-       
-      this.m_drivetrain = drivetrainHardware.drivetrain;
-
       this.m_turnScalar = turn_scalar;
       this.m_deadband = deadband;
 
-      // Disable built in deadband application
-      this.m_drivetrain.setDeadband(0);
-
       // Reset master TalonFX settings
-      m_leftMasterMotor.configFactoryDefault();
-      m_rightMasterMotor.configFactoryDefault();
+      m_lMasterMotor.configFactoryDefault();
+      m_rMasterMotor.configFactoryDefault();
 
       // Set all drive motors to brake
-      m_leftMasterMotor.setNeutralMode(NeutralMode.Brake);
-      m_leftSlaveMotor.setNeutralMode(NeutralMode.Brake);
-      m_rightMasterMotor.setNeutralMode(NeutralMode.Brake);
-      m_rightSlaveMotor.setNeutralMode(NeutralMode.Brake);
+      m_lMasterMotor.setNeutralMode(NeutralMode.Brake);
+      m_lSlaveMotor.setNeutralMode(NeutralMode.Brake);
+      m_rMasterMotor.setNeutralMode(NeutralMode.Brake);
+      m_rSlaveMotor.setNeutralMode(NeutralMode.Brake);
 
       // Do NOT invert motors
-      m_leftMasterMotor.setInverted(false);
-      m_leftSlaveMotor.setInverted(false);
-      m_rightMasterMotor.setInverted(false);
-      m_rightSlaveMotor.setInverted(false);
+      m_lMasterMotor.setInverted(false);
+      m_lSlaveMotor.setInverted(false);
+      m_rMasterMotor.setInverted(false);
+      m_rSlaveMotor.setInverted(false);
 
       // Make rear left motor controllers follow left master
-      m_leftSlaveMotor.set(ControlMode.Follower, m_leftMasterMotor.getDeviceID());
+      m_lSlaveMotor.set(ControlMode.Follower, m_lMasterMotor.getDeviceID());
 
       // Make rear right motor controllers follow right master
-      m_rightSlaveMotor.set(ControlMode.Follower, m_rightMasterMotor.getDeviceID());
+      m_rSlaveMotor.set(ControlMode.Follower, m_rMasterMotor.getDeviceID());
 
       // Make motors use integrated encoder
-      m_leftMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-      m_rightMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+      m_lMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+      m_rMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
       ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("JavaScript");
       for (int i = 0; i < MAX_LINEAR_SPEED * 1000; i++) {
@@ -252,8 +223,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Update the odometry in the periodic block
     // Negate gyro angle because gyro is positive going clockwise which doesn't match WPILib convention
     m_odometry.update(Rotation2d.fromDegrees(-getAngle()), 
-                      -m_leftMasterMotor.getSelectedSensorPosition() * METERS_PER_TICK,
-                      m_rightMasterMotor.getSelectedSensorPosition() * METERS_PER_TICK);
+                      -m_lMasterMotor.getSelectedSensorPosition() * METERS_PER_TICK,
+                      m_rMasterMotor.getSelectedSensorPosition() * METERS_PER_TICK);
   }
 
   /**
@@ -266,7 +237,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     speed = Math.copySign(Math.pow(speed, power), speed);
     turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
 
-    m_drivetrain.curvatureDrive(speed, -turn_request, true);
+    m_lMasterMotor.set(ControlMode.PercentOutput, speed, DemandType.ArbitraryFeedForward, -turn_request);
+    m_rMasterMotor.set(ControlMode.PercentOutput, speed, DemandType.ArbitraryFeedForward, turn_request);
 	}
 
   /**
@@ -304,10 +276,11 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Calculate optimal speed based on optimal slip ratio
     double optimalMotorOutput = (inertialVelocity != 0) ? 
                           m_tractionControlMap.get(inertialVelocity) : 
-                          OPTIMAL_SLIP_RATIO * m_speed;
+                          OPTIMAL_SLIP_RATIO * getSpeed();
     optimalMotorOutput = Math.copySign(optimalMotorOutput, speed);
 
-    m_drivetrain.arcadeDrive(optimalMotorOutput, -output, false);
+    m_lMasterMotor.set(ControlMode.PercentOutput, optimalMotorOutput, DemandType.ArbitraryFeedForward, -output);
+    m_rMasterMotor.set(ControlMode.PercentOutput, optimalMotorOutput, DemandType.ArbitraryFeedForward, output);
   }
 
   /**
@@ -326,9 +299,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param rightVolts  the commanded right output [-12, 12]
    */
   public void tankDriveVolts(double leftVolts, double rightVolts) {
-    m_leftMasterMotor.setVoltage(-leftVolts);
-    m_rightMasterMotor.setVoltage(rightVolts);
-    m_drivetrain.feed();
+    m_lMasterMotor.setVoltage(-leftVolts);
+    m_rMasterMotor.setVoltage(rightVolts);
   }
 
   /**
@@ -337,15 +309,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param rightSpeed speed [-1, 1]
    */
   public void tankDrive(double leftSpeed, double rightSpeed) {
-    m_drivetrain.tankDrive(leftSpeed, rightSpeed, false);
-  }
-
-  /**
-   * Sets maximum output of drivetrain
-   * @param maxOutput
-   */
-  public void setMaxOutput(double maxOutput) {
-    m_drivetrain.setMaxOutput(maxOutput);
+    m_lMasterMotor.set(ControlMode.PercentOutput, leftSpeed);
+    m_rMasterMotor.set(ControlMode.PercentOutput, rightSpeed);
   }
   
   /**
@@ -353,8 +318,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @return The current wheel speeds.
    */
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(m_leftMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK, 
-      m_rightMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK);
+    return new DifferentialDriveWheelSpeeds(m_lMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK, 
+      m_rMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK);
   }
 
   /**
@@ -363,8 +328,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public void resetOdometry() {
     resetAngle();
-    m_leftMasterMotor.setSelectedSensorPosition(0);
-    m_rightMasterMotor.setSelectedSensorPosition(0);
+    m_lMasterMotor.setSelectedSensorPosition(0);
+    m_rMasterMotor.setSelectedSensorPosition(0);
     m_odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(0));
   }
 
@@ -395,8 +360,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * Reset left and right drive
    */
   public void resetEncoders() {
-    m_leftMasterMotor.setSelectedSensorPosition(0);
-    m_rightMasterMotor.setSelectedSensorPosition(0);
+    m_lMasterMotor.setSelectedSensorPosition(0);
+    m_rMasterMotor.setSelectedSensorPosition(0);
   }
 
   /**
@@ -455,15 +420,16 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @return the average of the two encoder readings
    */
   public double getAverageEncoderDistance() {
-    return (((m_leftMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK) + 
-      (m_leftMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK)) / 2);
+    return (((m_lMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK) + 
+      (m_lMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK)) / 2);
   }
 
   /**
    * Stop drivetrain
    */
   public void stop() {
-    m_drivetrain.arcadeDrive(0.0, 0.0, false);
+    m_lMasterMotor.set(ControlMode.PercentOutput, 0.0);
+    m_rMasterMotor.set(ControlMode.PercentOutput, 0.0);
   }
 
   /**
@@ -542,11 +508,10 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void close() {
-    m_drivetrain = null;
-    m_leftMasterMotor = null;
-    m_rightMasterMotor = null;
-    m_leftSlaveMotor = null;
-    m_rightSlaveMotor = null;
+    m_lMasterMotor = null;
+    m_rMasterMotor = null;
+    m_lSlaveMotor = null;
+    m_rSlaveMotor = null;
     m_lidar = null;
     m_navx = null;
   }

@@ -1,11 +1,12 @@
 package frc.robot.subsystems;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
@@ -15,19 +16,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
+import org.mockito.ArgumentMatchers;
 
 import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants;
 
 public class DriveSubsystemTest {
-  public static final double DELTA = 5e-3;
-  private DifferentialDrive m_drivetrain;
+  public static final double DELTA = 2e-3;
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
 
-  private WPI_TalonFX m_leftMasterMotor;
-  private WPI_TalonFX m_rightMasterMotor;
+  private WPI_TalonFX m_lMasterMotor;
+  private WPI_TalonFX m_rMasterMotor;
   private WPI_TalonFX m_leftSlaveMotor;
   private WPI_TalonFX m_rightSlaveMotor;
 
@@ -37,15 +37,15 @@ public class DriveSubsystemTest {
   @BeforeEach
   public void setup() {
     // Create mock hardware devices
-    m_leftMasterMotor = mock(WPI_TalonFX.class);
-    m_rightMasterMotor = mock(WPI_TalonFX.class);
+    m_lMasterMotor = mock(WPI_TalonFX.class);
+    m_rMasterMotor = mock(WPI_TalonFX.class);
     m_leftSlaveMotor = mock(WPI_TalonFX.class);
     m_rightSlaveMotor = mock(WPI_TalonFX.class);
     m_lidar = mock(Counter.class);
     m_navx = mock(AHRS.class);
 
     // Create Hardware object using mock objects
-    m_drivetrainHardware = new DriveSubsystem.Hardware(m_leftMasterMotor, m_rightMasterMotor, m_leftSlaveMotor, m_rightSlaveMotor, m_lidar, m_navx);
+    m_drivetrainHardware = new DriveSubsystem.Hardware(m_lMasterMotor, m_rMasterMotor, m_leftSlaveMotor, m_rightSlaveMotor, m_lidar, m_navx);
 
     // Create DriveSubsystem object
     m_driveSubsystem = new DriveSubsystem(m_drivetrainHardware, 
@@ -78,8 +78,11 @@ public class DriveSubsystemTest {
     // Try to drive forward
     m_driveSubsystem.teleopPID(1.0, 0.0, 1);
 
-    // Verify if arcadeDrive method was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(1.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 
   @Test
@@ -97,8 +100,11 @@ public class DriveSubsystemTest {
     // Try to drive in reverse
     m_driveSubsystem.teleopPID(-1.0, 0.0, 1);
 
-    // Verify if arcadeDrive method was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(-1.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(-1.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(-1.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 
   @Test
@@ -111,13 +117,16 @@ public class DriveSubsystemTest {
     // Try to stop
     m_driveSubsystem.teleopPID(0.0, 0.0, 1);
 
-    // Verify if arcadeDrive method was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 
   @Test
   @Order(4)
-  @DisplayName("Test if robot ignores small turn in put values under threshold")
+  @DisplayName("Test if robot ignores small turn input values under threshold")
   public void ignoreSmallTurnInput() {
     // Hardcode NAVX sensor return values for angle, velocityX, velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
@@ -130,8 +139,11 @@ public class DriveSubsystemTest {
     // Try to drive with small turn value
     m_driveSubsystem.teleopPID(1.0, 0.001, 1);
 
-    // Verify if arcadeDrive method was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(1.0, DELTA), AdditionalMatchers.eq(0.0, DELTA), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 
   @Test
@@ -144,8 +156,11 @@ public class DriveSubsystemTest {
     // Try to turn left
     m_driveSubsystem.teleopPID(0.0, -1.0, 1);
 
-    // Verify if arcadeDrive method was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.0, 0.0), AdditionalMatchers.gt(0.0), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.gt(0.0));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.lt(0.0));
   }
 
   @Test
@@ -158,8 +173,11 @@ public class DriveSubsystemTest {
     // Try to turn right
     m_driveSubsystem.teleopPID(0.0, 1.0, 1);
 
-    // Verify if arcadeDrive was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.0, 0.0), AdditionalMatchers.lt(0.0), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.lt(0.0));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.gt(0.0));
   }
 
   @Test
@@ -177,7 +195,10 @@ public class DriveSubsystemTest {
     // Try to move forward
     m_driveSubsystem.teleopPID(1.0, 0.0, 1);
 
-    // Verify if arcadeDrive was called with expected values
-    verify(m_drivetrain, times(1)).arcadeDrive(AdditionalMatchers.eq(0.03, DELTA), AdditionalMatchers.eq(0.0, 0.0), eq(false));
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.03, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.03, DELTA), 
+                                          ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 }

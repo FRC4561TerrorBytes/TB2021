@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants;
@@ -37,8 +36,6 @@ public class DriveSubsystemTest {
 
   @BeforeEach
   public void setup() {
-    assert HAL.initialize(500, 0);
-
     // Create mock hardware devices
     m_leftMasterMotor = mock(WPI_TalonFX.class);
     m_rightMasterMotor = mock(WPI_TalonFX.class);
@@ -47,11 +44,8 @@ public class DriveSubsystemTest {
     m_lidar = mock(Counter.class);
     m_navx = mock(AHRS.class);
 
-    // Create mock DifferentialDrive object
-    m_drivetrain = mock(DifferentialDrive.class);
-
     // Create Hardware object using mock objects
-    m_drivetrainHardware = new DriveSubsystem.Hardware(m_drivetrain, m_leftMasterMotor, m_rightMasterMotor, m_leftSlaveMotor, m_rightSlaveMotor, m_lidar, m_navx);
+    m_drivetrainHardware = new DriveSubsystem.Hardware(m_leftMasterMotor, m_rightMasterMotor, m_leftSlaveMotor, m_rightSlaveMotor, m_lidar, m_navx);
 
     // Create DriveSubsystem object
     m_driveSubsystem = new DriveSubsystem(m_drivetrainHardware, 

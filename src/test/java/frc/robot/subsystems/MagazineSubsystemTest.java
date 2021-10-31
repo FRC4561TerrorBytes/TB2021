@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 
-import edu.wpi.first.hal.HAL;
 import frc.robot.Constants;
 
 public class MagazineSubsystemTest {
@@ -27,14 +26,15 @@ public class MagazineSubsystemTest {
 
   @BeforeEach
   public void setup() {
-    HAL.initialize(500, 0);
-
+    // Create mock hardware devices
     m_intakeMotor = mock(CANSparkMax.class);
     m_armMotor = mock(WPI_TalonSRX.class);
     m_magazineMotor = mock(WPI_TalonSRX.class);
 
+    // Create Hardware object using mock objects
     m_magazineHardware = new MagazineSubsystem.Hardware(m_intakeMotor, m_armMotor, m_magazineMotor);
 
+    //  Create MagazineSubsystem object
     m_magazineSubsystem = new MagazineSubsystem(m_magazineHardware, Constants.ARM_CONFIG);
   }
 

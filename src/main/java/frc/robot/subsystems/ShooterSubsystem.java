@@ -26,7 +26,7 @@ import frc.robot.Constants;
 import frc.robot.TalonPIDConfig;
 import frc.robot.VisionData;
 
-public class ShooterSubsystem extends SubsystemBase {
+public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
 
   public static class Hardware {
     private WPI_TalonFX flywheelMasterMotor, flywheelSlaveMotor;
@@ -375,5 +375,13 @@ public class ShooterSubsystem extends SubsystemBase {
       Hood.needsReset = false;
       Hood.motor.setSelectedSensorPosition(Constants.HOOD_BOTTOM_POSITION);
     } else if (!hoodLimit()) Hood.needsReset = true;
+  }
+
+  @Override
+  public void close() {
+    Flywheel.masterMotor = null;
+    Flywheel.slaveMotor = null;
+    Hood.motor = null;
+    Turret.motor = null;
   }
 }

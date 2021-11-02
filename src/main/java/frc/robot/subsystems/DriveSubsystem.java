@@ -74,6 +74,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private Counter m_lidar;
   private final double LIDAR_OFFSET = 10.0;
 
+  private final double DEADBAND = 0.009;
   private final double WHEEL_DIAMETER_METERS = 0.1524;
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
@@ -91,8 +92,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double MIN_TOLERANCE = 0.125;
 
   private double m_speed = 0.0;
-  private double m_turnScalar = 1.0;
-  private double m_deadband = 0.0; 
+  private double m_turnScalar = 1.0; 
   private double m_output = 0.0;
   private double m_inertialVelocity = 0.0;
   private double m_inertialVelocitySum = 0.0;
@@ -120,7 +120,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param deadband Deadzone for joystick
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double tolerance, double turn_scalar, double deadband, String tractionControlCurve) {
+  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double tolerance, double turn_scalar, String tractionControlCurve) {
       // The PIDController used by the subsystem
       m_drivePIDController = new PIDController(kP, 0, kD);
 
@@ -133,7 +133,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       this.m_navx = drivetrainHardware.navx;
 
       this.m_turnScalar = turn_scalar;
-      this.m_deadband = deadband;
 
       // Reset master TalonFX settings
       m_lMasterMotor.configFactoryDefault();
@@ -254,11 +253,11 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double angle = getAngle();
 
     // Set drive speed if it is more than the deadband
-    if (Math.abs(speed) >= m_deadband) setSpeed(speed);
-    else setSpeed(0.0);
+    speed = Math.copySign(Math.floor(Math.abs(speed) * 100) / 100, speed);
+    setSpeed(speed);
 
     // Start turning if input is greater than deadband
-    if (Math.abs(turn_request) >= m_deadband) {
+    if (Math.abs(turn_request) >= DEADBAND) {
       // Add delta to setpoint scaled by factor
       m_drivePIDController.setSetpoint(angle + (turn_request * m_turnScalar));
       m_wasTurning = true;
@@ -285,12 +284,23 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   /**
    * Turn robot to set angle
-   * @param angle In degrees
+   * @param angleSetpoint In degrees [-180, 180]
    * @return True when complete
    */
-  public void turnToAngle(double angle) {
+  public boolean turnToAngle(double angleSetpoint) {
+    MathUtil.clamp(angleSetpoint, -180.0, 180.0);
     resetAngle();
-    m_drivePIDController.setSetpoint(angle);
+    m_drivePIDController.setSetpoint(angleSetpoint);
+
+    double currentAngle = getAngle();
+    while (Math.abs(currentAngle) <= Math.abs(angleSetpoint)) {
+      double output = m_drivePIDController.calculate(currentAngle, m_drivePIDController.getSetpoint());
+      m_lMasterMotor.set(ControlMode.PercentOutput, 0.0, DemandType.ArbitraryFeedForward, -output);
+      m_rMasterMotor.set(ControlMode.PercentOutput, 0.0, DemandType.ArbitraryFeedForward, output);
+      currentAngle = getAngle();
+    }
+
+    return true;
   }
 
   /**
@@ -309,8 +319,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param rightSpeed speed [-1, 1]
    */
   public void tankDrive(double leftSpeed, double rightSpeed) {
-    m_lMasterMotor.set(ControlMode.PercentOutput, leftSpeed);
-    m_rMasterMotor.set(ControlMode.PercentOutput, rightSpeed);
+    m_lMasterMotor.set(ControlMode.PercentOutput, leftSpeed, DemandType.ArbitraryFeedForward, 0.0);
+    m_rMasterMotor.set(ControlMode.PercentOutput, rightSpeed, DemandType.ArbitraryFeedForward, 0.0);
   }
   
   /**

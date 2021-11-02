@@ -53,7 +53,6 @@ public class DriveSubsystemTest {
                                           Constants.DRIVE_kD, 
                                           Constants.DRIVE_TOLERANCE,
                                           Constants.DRIVE_TURN_SCALAR,
-                                          Constants.DEADBAND,
                                           Constants.DRIVE_TRACTION_CONTROL_CURVE);
   }
 

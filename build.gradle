@@ -54,6 +54,9 @@ dependencies {
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 
+    implementation 'org.mozilla:rhino:1.7.13'
+    implementation 'org.mozilla:rhino-engine:1.7.13'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.+'
     testImplementation 'org.mockito:mockito-core:3.+'
 

@@ -21,6 +21,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Counter;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -160,15 +161,15 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       m_lMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
       m_rMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
-      ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+      ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("rhino");
       for (int i = 0; i < MAX_LINEAR_SPEED * 1000; i++) {
         double key = (double)i / 1000;
         try {
-          double value = (double)jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key)));
-          value = MathUtil.clamp(value, 0, 1.0);
+          double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
+          value = MathUtil.clamp(value, 0.0, 1.0);
           m_tractionControlMap.put(key, value);
         } catch (ScriptException e) {
-          e.printStackTrace();
+          DriverStation.reportError(e.getMessage(), true);
         }
       }
 

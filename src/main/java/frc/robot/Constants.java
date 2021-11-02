@@ -163,7 +163,7 @@ public final class Constants {
                                                                         ARM_MOTION_SMOOTHING);
 
     // Analog stick deadband value
-    public static final double DEADBAND = 0.005;
+    public static final double DEADBAND = 0.009;
     
     // Joystick Ports
     public static final int RIGHT_JOYSTICK_PORT = 1;

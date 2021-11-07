@@ -92,7 +92,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   private final double MIN_TOLERANCE = 0.125;
 
-  private double m_speed = 0.0;
   private double m_turnScalar = 1.0; 
   private double m_output = 0.0;
   private double m_inertialVelocity = 0.0;
@@ -255,7 +254,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Set drive speed if it is more than the deadband
     speed = Math.copySign(Math.floor(Math.abs(speed) * 100) / 100, speed);
-    setSpeed(speed);
 
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= DEADBAND) {
@@ -270,17 +268,17 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       }
     }
 
-    double output = m_drivePIDController.calculate(angle, m_drivePIDController.getSetpoint());
+    double turnOutput = m_drivePIDController.calculate(angle);
     // Truncate values to 3 decimal places
     double inertialVelocity = Math.floor(getInertialVelocity() * 1000) / 1000;
     // Calculate optimal speed based on optimal slip ratio
-    double optimalMotorOutput = (inertialVelocity != 0) ? 
+    double optimalSpeedOutput = (inertialVelocity != 0) ? 
                           m_tractionControlMap.get(inertialVelocity) : 
-                          OPTIMAL_SLIP_RATIO * getSpeed();
-    optimalMotorOutput = Math.copySign(optimalMotorOutput, speed);
+                          OPTIMAL_SLIP_RATIO * speed;
+    optimalSpeedOutput = Math.copySign(optimalSpeedOutput, speed);
 
-    m_lMasterMotor.set(ControlMode.PercentOutput, optimalMotorOutput, DemandType.ArbitraryFeedForward, -output);
-    m_rMasterMotor.set(ControlMode.PercentOutput, optimalMotorOutput, DemandType.ArbitraryFeedForward, output);
+    m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);
+    m_rMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, turnOutput);
   }
 
   /**
@@ -441,22 +439,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   public void stop() {
     m_lMasterMotor.set(ControlMode.PercentOutput, 0.0);
     m_rMasterMotor.set(ControlMode.PercentOutput, 0.0);
-  }
-
-  /**
-   * Set DriveSubsystem speed
-   * @param speed Desired speed from -1.0 to 1.0
-   */
-  public void setSpeed(double speed) {
-    m_speed = speed;
-  }
-
-  /**
-   * Get DriveSubsystem speed
-   * @return Speed
-   */
-  public double getSpeed() {
-    return m_speed;
   }
 
   /**

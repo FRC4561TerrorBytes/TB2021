@@ -75,7 +75,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private Counter m_lidar;
   private final double LIDAR_OFFSET = 10.0;
 
-  private final double DEADBAND = 0.009;
+  private final double DEADBAND = 0.001;
   private final double WHEEL_DIAMETER_METERS = 0.1524;
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
@@ -253,7 +253,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double angle = getAngle();
 
     // Set drive speed if it is more than the deadband
-    speed = Math.copySign(Math.floor(Math.abs(speed) * 100) / 100, speed);
+    speed = Math.copySign(Math.floor(Math.abs(speed) * 1000) / 1000, speed);
 
     // Start turning if input is greater than deadband
     if (Math.abs(turn_request) >= DEADBAND) {

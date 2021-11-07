@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.Counter;
 import frc.robot.Constants;
 
 public class DriveSubsystemTest {
-  public static final double DELTA = 2e-3;
+  public static final double DELTA = 1e-3;
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
 

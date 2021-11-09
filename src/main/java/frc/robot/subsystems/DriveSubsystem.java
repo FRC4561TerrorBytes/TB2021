@@ -272,9 +272,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Truncate values to 3 decimal places
     double inertialVelocity = Math.floor(getInertialVelocity() * 1000) / 1000;
     // Calculate optimal speed based on optimal slip ratio
-    double optimalSpeedOutput = (inertialVelocity != 0) ? 
-                          m_tractionControlMap.get(inertialVelocity) : 
-                          OPTIMAL_SLIP_RATIO * speed;
+    double optimalSpeedOutput = (inertialVelocity == 0) ? 
+                            OPTIMAL_SLIP_RATIO * speed : 
+                            m_tractionControlMap.get(inertialVelocity);
     optimalSpeedOutput = Math.copySign(optimalSpeedOutput, speed);
 
     m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);

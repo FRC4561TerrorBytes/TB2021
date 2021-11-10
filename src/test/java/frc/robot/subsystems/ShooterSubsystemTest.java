@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
@@ -14,11 +16,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
+import org.mockito.ArgumentMatchers;
 
 import frc.robot.Constants;
 
 public class ShooterSubsystemTest {
-  public static final double DELTA = 5e-3;
+  public static final double DELTA = 1e-3;
   private ShooterSubsystem m_shooterSubsystem;
   private ShooterSubsystem.Hardware m_shooterHardware;
   private WPI_TalonFX m_flywheelMasterMotor;
@@ -54,7 +57,12 @@ public class ShooterSubsystemTest {
   @Order(1)
   @DisplayName("Test if robot can spin up flywheel")
   public void spinFlywheel() {
-    // TODO: Write test...
+    m_shooterSubsystem.setFlywheelSpeed(5400);
+
+    verify(m_flywheelMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.Velocity), 
+                                                AdditionalMatchers.eq(18432, DELTA), 
+                                                ArgumentMatchers.eq(DemandType.ArbitraryFeedForward),
+                                                AdditionalMatchers.eq(1, DELTA));
   }
 
   @Test
@@ -62,6 +70,7 @@ public class ShooterSubsystemTest {
   @DisplayName("Test if robot can stop flywheel")
   public void stopFlywheel() {
     m_shooterSubsystem.flywheelStop();
+    
     verify(m_flywheelMasterMotor, times(1)).set(AdditionalMatchers.eq(0.0, DELTA));
     assertEquals(0.0, m_flywheelMasterMotor.getIntegralAccumulator(), DELTA);
   }

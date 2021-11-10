@@ -22,6 +22,7 @@ import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.Constants;
 import frc.robot.TalonPIDConfig;
 import frc.robot.VisionData;
@@ -274,10 +275,13 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
    * @param speed input speed to keep the motor at (RPM)
    */
   public void setFlywheelSpeed(double speed) {
-    speed = Flywheel.rpmToTicksPer100ms(Math.min(Math.abs(speed), Flywheel.MAX_SPEED_RPM));
+    speed = MathUtil.clamp(speed, 0, Flywheel.MAX_SPEED_RPM);
+    double speedInTicks = Flywheel.rpmToTicksPer100ms(speed);
     double kF = Flywheel.MAX_kF * (speed / Flywheel.MAX_SPEED_RPM);
 
-    Flywheel.masterMotor.set(ControlMode.Velocity, speed, DemandType.ArbitraryFeedForward, kF);
+    Flywheel.masterMotor.set(ControlMode.Velocity, speedInTicks, DemandType.ArbitraryFeedForward, kF);
+    //kf = 1
+    //speed = 18432
   }
 
   /**

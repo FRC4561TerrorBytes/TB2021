@@ -86,8 +86,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double DRIVETRAIN_EFFICIENCY = 0.88;
   private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //4.106 m/s
   private final double OPTIMAL_SLIP_RATIO = 0.03;
-  private final double INERTAL_VELOCITY_THRESHOLD = 0.005;
-  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 50;
+  private final double INERTIAL_VELOCITY_THRESHOLD = 0.005;
+  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 60;
   private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
 
   private final double MIN_TOLERANCE = 0.125;
@@ -273,8 +273,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double inertialVelocity = Math.floor(getInertialVelocity() * 1000) / 1000;
     // Calculate optimal speed based on optimal slip ratio
     double optimalSpeedOutput = (inertialVelocity == 0) ? 
-                            OPTIMAL_SLIP_RATIO * speed : 
-                            m_tractionControlMap.get(inertialVelocity);
+                                OPTIMAL_SLIP_RATIO * speed : 
+                                m_tractionControlMap.get(inertialVelocity);
     optimalSpeedOutput = Math.copySign(optimalSpeedOutput, speed);
 
     m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);
@@ -328,7 +328,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
     return new DifferentialDriveWheelSpeeds(m_lMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK, 
-      m_rMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK);
+                                            m_rMasterMotor.getSelectedSensorVelocity() * 10 * METERS_PER_TICK);
   }
 
   /**
@@ -410,7 +410,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public double getInertialVelocity() {
     // Return the latest moviing average, ignoring really small values
-    return (m_inertialVelocity >= INERTAL_VELOCITY_THRESHOLD) ? 
+    return (m_inertialVelocity >= INERTIAL_VELOCITY_THRESHOLD) ? 
             m_inertialVelocity : 
             0;
   }
@@ -430,7 +430,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public double getAverageEncoderDistance() {
     return (((m_lMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK) + 
-      (m_lMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK)) / 2);
+              (m_lMasterMotor.getSensorCollection().getIntegratedSensorPosition() * METERS_PER_TICK)) / 2);
   }
 
   /**

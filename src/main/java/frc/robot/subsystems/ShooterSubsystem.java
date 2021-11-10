@@ -45,8 +45,7 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
 
   // Config values and create motor objects for the flywheel
   private static class Flywheel {
-    private static double MAX_kF = 1.0;
-    private static double MAX_SPEED_RPM = 5400;
+    private static final double MAX_SPEED_RPM = 5400;
     private static final int TICKS_PER_ROTATION = 2048;
     private static WPI_TalonFX masterMotor;
     private static WPI_TalonFX slaveMotor;
@@ -277,11 +276,8 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
   public void setFlywheelSpeed(double speed) {
     speed = MathUtil.clamp(speed, 0, Flywheel.MAX_SPEED_RPM);
     double speedInTicks = Flywheel.rpmToTicksPer100ms(speed);
-    double kF = Flywheel.MAX_kF * (speed / Flywheel.MAX_SPEED_RPM);
 
-    Flywheel.masterMotor.set(ControlMode.Velocity, speedInTicks, DemandType.ArbitraryFeedForward, kF);
-    //kf = 1
-    //speed = 18432
+    Flywheel.masterMotor.set(ControlMode.Velocity, speedInTicks, DemandType.ArbitraryFeedForward, speedInTicks);
   }
 
   /**

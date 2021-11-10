@@ -62,7 +62,7 @@ public class ShooterSubsystemTest {
     verify(m_flywheelMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.Velocity), 
                                                 AdditionalMatchers.eq(18432, DELTA), 
                                                 ArgumentMatchers.eq(DemandType.ArbitraryFeedForward),
-                                                AdditionalMatchers.eq(1, DELTA));
+                                                AdditionalMatchers.eq(18432, DELTA));
   }
 
   @Test

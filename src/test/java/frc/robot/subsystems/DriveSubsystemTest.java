@@ -53,7 +53,8 @@ public class DriveSubsystemTest {
                                           Constants.DRIVE_kD, 
                                           Constants.DRIVE_TOLERANCE,
                                           Constants.DRIVE_TURN_SCALAR,
-                                          Constants.DRIVE_TRACTION_CONTROL_CURVE);
+                                          Constants.DRIVE_TRACTION_CONTROL_CURVE,
+                                          Constants.DRIVE_THROTTLE_INPUT_CURVE);
   }
 
   @AfterEach
@@ -75,7 +76,7 @@ public class DriveSubsystemTest {
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive forward
-    m_driveSubsystem.teleopPID(1.0, 0.0, 1);
+    m_driveSubsystem.teleopPID(1.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 
@@ -97,7 +98,7 @@ public class DriveSubsystemTest {
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive in reverse
-    m_driveSubsystem.teleopPID(-1.0, 0.0, 1);
+    m_driveSubsystem.teleopPID(-1.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(-1.0, DELTA), 
@@ -114,7 +115,7 @@ public class DriveSubsystemTest {
     when(m_navx.getAngle()).thenReturn(0.0);
 
     // Try to stop
-    m_driveSubsystem.teleopPID(0.0, 0.0, 1);
+    m_driveSubsystem.teleopPID(0.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
@@ -136,7 +137,7 @@ public class DriveSubsystemTest {
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive with small turn value
-    m_driveSubsystem.teleopPID(1.0, 0.001, 1);
+    m_driveSubsystem.teleopPID(1.0, 0.001);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 
@@ -153,7 +154,7 @@ public class DriveSubsystemTest {
     when(m_navx.getAngle()).thenReturn(0.0);
 
     // Try to turn left
-    m_driveSubsystem.teleopPID(0.0, -1.0, 1);
+    m_driveSubsystem.teleopPID(0.0, -1.0);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
@@ -170,7 +171,7 @@ public class DriveSubsystemTest {
     when(m_navx.getAngle()).thenReturn(0.0);
 
     // Try to turn right
-    m_driveSubsystem.teleopPID(0.0, 1.0, 1);
+    m_driveSubsystem.teleopPID(0.0, 1.0);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.0, DELTA), 
@@ -192,12 +193,12 @@ public class DriveSubsystemTest {
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
 
     // Try to move forward
-    m_driveSubsystem.teleopPID(1.0, 0.0, 1);
+    m_driveSubsystem.teleopPID(1.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
-    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.03, DELTA), 
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.04), AdditionalMatchers.gt(0.0)), 
                                           ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
-    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(0.03, DELTA), 
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.04), AdditionalMatchers.gt(0.0)), 
                                           ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 

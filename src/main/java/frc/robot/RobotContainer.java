@@ -55,7 +55,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(), Constants.DRIVE_kP, Constants.DRIVE_kD, 
-    Constants.DRIVE_TOLERANCE, Constants.DRIVE_TURN_SCALAR, Constants.DRIVE_TRACTION_CONTROL_CURVE);
+    Constants.DRIVE_TOLERANCE, Constants.DRIVE_TURN_SCALAR, Constants.DRIVE_TRACTION_CONTROL_CURVE, Constants.DRIVE_THROTTLE_INPUT_CURVE);
   private static final ClimberSubsystem CLIMBER_SUBSYSTEM = new ClimberSubsystem();
 
   public static final MagazineSubsystem MAGAZINE_SUBSYSTEM = new MagazineSubsystem(MagazineSubsystem.initializeHardware(), Constants.ARM_CONFIG);
@@ -92,7 +92,7 @@ public class RobotContainer {
     initializeCamera();
 
     // Set default commands for subsystems
-    DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(LEFT_JOYSTICK.getY(), RIGHT_JOYSTICK.getX(), Constants.DRIVE_RESPONSE_EXPONENT), DRIVE_SUBSYSTEM));
+    DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(LEFT_JOYSTICK.getY(), RIGHT_JOYSTICK.getX()), DRIVE_SUBSYSTEM));
     // MAGAZINE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(), MAGAZINE_SUBSYSTEM));
 
     //Create Auto Mode Selection

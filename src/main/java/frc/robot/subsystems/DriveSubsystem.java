@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.Constants;
@@ -85,7 +86,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
   private final double DRIVETRAIN_EFFICIENCY = 0.88;
   private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //4.106 m/s
-  private final double OPTIMAL_SLIP_RATIO = 0.03;
+  private final double WHEEL_SLIP_LIMIT = 0.03;
   private final double INERTIAL_VELOCITY_THRESHOLD = 0.005;
   private final int INERTIAL_VELOCITY_WINDOW_SIZE = 60;
   private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
@@ -102,6 +103,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private boolean m_wasTurning = false;
 
   private HashMap<Double, Double> m_tractionControlMap = new HashMap<Double, Double>();
+  private HashMap<Double, Double> m_throttleInputMap = new HashMap<Double, Double>();
 
   //Odometry class for tracking robot pose
   private final DifferentialDriveOdometry m_odometry;
@@ -120,7 +122,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param deadband Deadzone for joystick
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double tolerance, double turn_scalar, String tractionControlCurve) {
+  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double tolerance, double turn_scalar, String tractionControlCurve, String throttleInputCurve) {
       // The PIDController used by the subsystem
       m_drivePIDController = new PIDController(kP, 0, kD);
 
@@ -161,12 +163,22 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       m_rMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
       ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("rhino");
-      for (int i = 0; i < MAX_LINEAR_SPEED * 1000; i++) {
+      for (int i = 0; i <= MAX_LINEAR_SPEED * 1000; i++) {
         double key = (double)i / 1000;
         try {
           double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
           value = MathUtil.clamp(value, 0.0, 1.0);
           m_tractionControlMap.put(key, value);
+        } catch (ScriptException e) {
+          DriverStation.reportError(e.getMessage(), true);
+        }
+      }
+      for (int i = 0; i <= 1000; i++) {
+        double key = (double)i / 1000;
+        try {
+          double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(key))).toString());
+          value = MathUtil.clamp(value, 0.0, MAX_LINEAR_SPEED);
+          m_throttleInputMap.put(key, value);
         } catch (ScriptException e) {
           DriverStation.reportError(e.getMessage(), true);
         }
@@ -237,28 +249,26 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
 
     m_lMasterMotor.set(ControlMode.PercentOutput, speed, DemandType.ArbitraryFeedForward, -turn_request);
-    m_rMasterMotor.set(ControlMode.PercentOutput, speed, DemandType.ArbitraryFeedForward, turn_request);
+    m_rMasterMotor.set(ControlMode.PercentOutput, speed, DemandType.ArbitraryFeedForward, +turn_request);
 	}
 
   /**
    * Call this repeatedly to drive using PID during teleoperation
-   * @param speed Desired speed from -1.0 to 1.0
-   * @param turn_request Turn input from -1.0 to 1.0
+   * @param speedRequest Desired speed from -1.0 to 1.0
+   * @param turnRequest Turn input from -1.0 to 1.0
    * @param power exponent for drive response curve. 1 is linear response
    */
-  public void teleopPID(double speed, double turn_request, int power) {
-    speed = Math.copySign(Math.pow(speed, power), speed);
-    turn_request = Math.copySign(Math.pow(turn_request, power), turn_request);
-
+  public void teleopPID(double speedRequest, double turnRequest) {
     double angle = getAngle();
 
     // Set drive speed if it is more than the deadband
-    speed = Math.copySign(Math.floor(Math.abs(speed) * 1000) / 1000, speed);
+    speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest);
+    double requestedLinearSpeed = m_throttleInputMap.get(Math.abs(speedRequest));
 
     // Start turning if input is greater than deadband
-    if (Math.abs(turn_request) >= DEADBAND) {
+    if (Math.abs(turnRequest) >= DEADBAND) {
       // Add delta to setpoint scaled by factor
-      m_drivePIDController.setSetpoint(angle + (turn_request * m_turnScalar));
+      m_drivePIDController.setSetpoint(angle + (turnRequest * m_turnScalar));
       m_wasTurning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
@@ -268,17 +278,27 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       }
     }
 
+    // Calculate next PID turn output
     double turnOutput = m_drivePIDController.calculate(angle);
-    // Truncate values to 3 decimal places
-    double inertialVelocity = Math.floor(getInertialVelocity() * 1000) / 1000;
-    // Calculate optimal speed based on optimal slip ratio
-    double optimalSpeedOutput = (inertialVelocity == 0) ? 
-                                OPTIMAL_SLIP_RATIO * speed : 
-                                m_tractionControlMap.get(inertialVelocity);
-    optimalSpeedOutput = Math.copySign(optimalSpeedOutput, speed);
 
+    double inertialVelocity = getInertialVelocity();
+
+    // Get requested acceleration with minimum of 1 cm/sec^2
+    double requestedAcceleration = requestedLinearSpeed - inertialVelocity;
+    requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration * 100)) / 100, requestedAcceleration);
+
+    // Apply slip ratio to requested acceleration to limit wheel slip
+    requestedAcceleration = Math.copySign(Math.abs(requestedAcceleration * WHEEL_SLIP_LIMIT), requestedAcceleration);
+
+    // Calculate optimal velocity and truncate value to 3 decimal places and clamp between zero and maximum linear speed
+    double velocityLookup = MathUtil.clamp(Math.floor((inertialVelocity + requestedAcceleration) * 1000) / 1000, 0.0, MAX_LINEAR_SPEED);
+
+    // Lookup optimal motor speed output
+    double optimalSpeedOutput = Math.copySign(m_tractionControlMap.get(velocityLookup), speedRequest);
+
+    // Run motors with appropriate values
     m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);
-    m_rMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, turnOutput);
+    m_rMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, +turnOutput);
   }
 
   /**

@@ -43,7 +43,7 @@ public class AutoDriveCommand extends CommandBase {
       double stoppingDistancePer = (VisionData.getDistance() - Constants.TARGET_DISTANCE) / Constants.AUTO_STOPPING_DISTANCE;
       stoppingDistancePer = Math.max(Math.min(stoppingDistancePer, 1.0), -1.0);
       // If robot has x% of stopping distance left, move at x% speed
-      DRIVE_SUBSYSTEM.teleopPID(Constants.AUTO_SPEED * stoppingDistancePer, 0.0, 1);
+      DRIVE_SUBSYSTEM.teleopPID(Constants.AUTO_SPEED * stoppingDistancePer, 0.0);
     }
   }
 

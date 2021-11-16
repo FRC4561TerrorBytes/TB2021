@@ -30,7 +30,6 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.Constants;
@@ -162,10 +161,14 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       m_lMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
       m_rMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
+      // Get Mozilla Rhino JavaScript engine
       ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("rhino");
+
+      // Fill traction control hashmap
       for (int i = 0; i <= MAX_LINEAR_SPEED * 1000; i++) {
         double key = (double)i / 1000;
         try {
+          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, 1.0]
           double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
           value = MathUtil.clamp(value, 0.0, 1.0);
           m_tractionControlMap.put(key, value);
@@ -173,9 +176,12 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
           DriverStation.reportError(e.getMessage(), true);
         }
       }
+
+      // Fill throttle input hashmap
       for (int i = 0; i <= 1000; i++) {
         double key = (double)i / 1000;
         try {
+          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, 1.0]
           double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(key))).toString());
           value = MathUtil.clamp(value, 0.0, MAX_LINEAR_SPEED);
           m_throttleInputMap.put(key, value);

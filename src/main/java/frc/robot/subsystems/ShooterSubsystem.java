@@ -8,7 +8,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.BaseTalon;
@@ -45,7 +44,7 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
 
   // Config values and create motor objects for the flywheel
   private static class Flywheel {
-    private static final double MAX_SPEED_RPM = 5400;
+    private static final double MAX_SPEED_RPM = 6380;
     private static final int TICKS_PER_ROTATION = 2048;
     private static WPI_TalonFX masterMotor;
     private static WPI_TalonFX slaveMotor;
@@ -66,8 +65,6 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
     private static boolean needsReset = true;
     private static int topPosition = Constants.HOOD_TOP_POSITION;
     private static double bottomPosition = Constants.HOOD_BOTTOM_POSITION;
-    private static final int TICKS_PER_ROTATION = 4096;
-    private static final double GEAR_RATIO = 298 / 25;
     private static WPI_TalonSRX motor;
     private static TalonPIDConfig config;
   }
@@ -77,8 +74,8 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
     private static int leftPosition = Constants.TURRET_FRONT_LIMIT_POSITION;
     private static int straightPosition = Constants.TURRET_STRAIGHT_POSITION;
     private static int rightPosition = Constants.TURRET_BACK_LIMIT_POSITION;
-    private static final int TICKS_PER_ROTATION = 4096;
-    private static final int GEAR_RATIO = 94 / 15;
+    private static final int TICKS_PER_ROTATION = Constants.CTRE_MAG_ENCODER_TICKS_PER_ROTATION;
+    private static final double GEAR_RATIO = Constants.TURRET_GEAR_RATIO_AFTER_ENCODER;
     private static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * GEAR_RATIO) / 360;
     private static WPI_TalonSRX motor;
     private static TalonPIDConfig config;
@@ -116,7 +113,7 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
     Turret.config = turretConfig;
 
     // Initialize config for flywheel PID
-    Flywheel.masterConfig.initializeTalonPID(Flywheel.masterMotor, TalonFXFeedbackDevice.IntegratedSensor, false, false);
+    Flywheel.masterConfig.initializeTalonPID(Flywheel.masterMotor, TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice(), false, false);
     Flywheel.slaveMotor.set(ControlMode.Follower, Flywheel.masterMotor.getDeviceID());
     Flywheel.slaveMotor.setInverted(true);
 
@@ -331,14 +328,14 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
    * @return if the front limit switch is pressed
    */
   public boolean turretLimitFront() {
-    return Turret.motor.getSensorCollection().isRevLimitSwitchClosed(); // TODO: Figure out if this is right
+    return Turret.motor.getSensorCollection().isRevLimitSwitchClosed();
   }
 
   /**
    * @return if the back limit switch is pressed
    */
   public boolean turretLimitBack() {
-    return Turret.motor.getSensorCollection().isFwdLimitSwitchClosed(); // TODO: Figure out if this is right
+    return Turret.motor.getSensorCollection().isFwdLimitSwitchClosed();
   }
 
   public void toggleFlywheel(double speed) {
@@ -356,7 +353,7 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
    * @return if the back limit switch is pressed
    */
   public boolean hoodLimit() {
-    return Hood.motor.getSensorCollection().isFwdLimitSwitchClosed(); // TODO: Figure out if this is right
+    return Hood.motor.getSensorCollection().isFwdLimitSwitchClosed();
   }
 
   @Override

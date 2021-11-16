@@ -10,9 +10,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.BaseTalon;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 /** 
  * Automates the configuration of Talon PID and MotionMagic parameters
@@ -23,22 +21,24 @@ public class TalonPIDConfig {
   private static final int MAX_MOTION_SMOOTHING = 7;
   private static final int PID_SLOT = 0;
 
-  private boolean motionMagic = false;
-  private boolean enableSoftLimits = true;
+  private boolean m_motionMagic = false;
+  private boolean m_enableSoftLimits = true;
 
-  private boolean sensorPhase = false;
-  private boolean invertMotor = false;
-  private double kP = 0.0;
-  private double kI = 0.0;
-  private double kD = 0.0;
-  private double kF = 0.0;
-  private double tolerance = 1.0;
-  private double lowerLimit = 0.0;
-  private double upperLimit = 0.0;
+  private boolean m_sensorPhase = false;
+  private boolean m_invertMotor = false;
+  private double m_ticksPerRotation = 0.0;
+  private double m_maxRPM = 0.0;
+  private double m_kP = 0.0;
+  private double m_kI = 0.0;
+  private double m_kD = 0.0;
+  private double m_kF = 0.0;
+  private double m_tolerance = 1.0;
+  private double m_lowerLimit = 0.0;
+  private double m_upperLimit = 0.0;
 
-  private double velocityRPM = 1.0;
-  private double accelerationRPMPerSec = 1.0;
-  private int motionSmoothing = 0;
+  private double m_velocityRPM = 1.0;
+  private double m_accelerationRPMPerSec = 1.0;
+  private int m_motionSmoothing = 0;
 
   /**
    * Create a TalonPIDConfig, without MotionMagic parameters
@@ -56,18 +56,18 @@ public class TalonPIDConfig {
   TalonPIDConfig(boolean sensorPhase, boolean invertMotor, 
                   double kP, double kI, double kD, double kF, 
                   double tolerance, double lowerLimit, double upperLimit, boolean enableSoftLimits) {
-    this.sensorPhase = sensorPhase;
-    this.invertMotor = invertMotor;
-    this.kP = kP;
-    this.kI = kI;
-    this.kD = kD;
-    this.kF = kF;
-    this.tolerance = tolerance;
-    this.lowerLimit = lowerLimit;
-    this.upperLimit = upperLimit;
-    this.enableSoftLimits = enableSoftLimits;
+    this.m_sensorPhase = sensorPhase;
+    this.m_invertMotor = invertMotor;
+    this.m_kP = kP;
+    this.m_kI = kI;
+    this.m_kD = kD;
+    this.m_kF = kF;
+    this.m_tolerance = tolerance;
+    this.m_lowerLimit = lowerLimit;
+    this.m_upperLimit = upperLimit;
+    this.m_enableSoftLimits = enableSoftLimits;
 
-    if (this.tolerance < MIN_TOLERANCE) this.tolerance = MIN_TOLERANCE;
+    if (this.m_tolerance < MIN_TOLERANCE) this.m_tolerance = MIN_TOLERANCE;
   }
 
   /**
@@ -84,17 +84,17 @@ public class TalonPIDConfig {
   TalonPIDConfig(boolean sensorPhase, boolean invertMotor, 
                   double kP, double kI, double kD, double kF, 
                   double tolerance) {
-    this.sensorPhase = sensorPhase;
-    this.invertMotor = invertMotor;
-    this.kP = kP;
-    this.kI = kI;
-    this.kD = kD;
-    this.kF = kF;
-    this.tolerance = tolerance;
+    this.m_sensorPhase = sensorPhase;
+    this.m_invertMotor = invertMotor;
+    this.m_kP = kP;
+    this.m_kI = kI;
+    this.m_kD = kD;
+    this.m_kF = kF;
+    this.m_tolerance = tolerance;
 
-    this.enableSoftLimits = false;
+    this.m_enableSoftLimits = false;
 
-    if (this.tolerance < MIN_TOLERANCE) this.tolerance = MIN_TOLERANCE;
+    if (this.m_tolerance < MIN_TOLERANCE) this.m_tolerance = MIN_TOLERANCE;
   }
 
   /**
@@ -102,40 +102,43 @@ public class TalonPIDConfig {
    * 
    * @param sensorPhase set sensor phase of encoder
    * @param invertMotor invert motor or not
+   * @param ticksPerRotation number of ticks in one motor revolution
+   * @param maxRPM max RPM for this motor
    * @param kP proportional gain
    * @param kI integral gain
    * @param kD derivative gain
    * @param kF feed-forward gain
    * @param tolerance tolerance of PID loop
-   * @param velocity MotionMagic cruise velocity in ticks per 100ms
-   * @param accelerationRPMPerSec MotionMagic acceleration in ticks per 100ms per sec
+   * @param velocity MotionMagic cruise velocity in RPM
+   * @param accelerationRPMPerSec MotionMagic acceleration in RPM
    * @param motionSmoothing MotionMagic smoothing factor [0, 7]
    */
-  TalonPIDConfig(boolean sensorPhase, boolean invertMotor, 
-                  double kP, double kI, double kD, double kF, 
-                  double tolerance, double lowerLimit, double upperLimit, boolean enableSoftLimits,
+  TalonPIDConfig(boolean sensorPhase, boolean invertMotor, double ticksPerRotation, double maxRPM,
+                  double kP, double kI, double kD, double tolerance, 
+                  double lowerLimit, double upperLimit, boolean enableSoftLimits,
                   double velocityRPM, double accelerationRPMPerSec, int motionSmoothing) {
-    this.sensorPhase = sensorPhase;
-    this.invertMotor = invertMotor;
-    this.kP = kP;
-    this.kI = kI;
-    this.kD = kD;
-    this.kF = kF;
-    this.tolerance = tolerance;
-    this.lowerLimit = lowerLimit;
-    this.upperLimit = upperLimit;
-    this.enableSoftLimits = enableSoftLimits;
+    this.m_sensorPhase = sensorPhase;
+    this.m_invertMotor = invertMotor;
+    this.m_ticksPerRotation = ticksPerRotation;
+    this.m_maxRPM = maxRPM;
+    this.m_kP = kP;
+    this.m_kI = kI;
+    this.m_kD = kD;
+    this.m_tolerance = tolerance;
+    this.m_lowerLimit = lowerLimit;
+    this.m_upperLimit = upperLimit;
+    this.m_enableSoftLimits = enableSoftLimits;
     
-    this.velocityRPM = velocityRPM;
-    this.accelerationRPMPerSec = accelerationRPMPerSec;
-    this.motionSmoothing = motionSmoothing;
+    this.m_velocityRPM = velocityRPM;
+    this.m_accelerationRPMPerSec = accelerationRPMPerSec;
+    this.m_motionSmoothing = motionSmoothing;
 
-    if (this.tolerance < MIN_TOLERANCE) this.tolerance = MIN_TOLERANCE;
+    if (this.m_tolerance < MIN_TOLERANCE) this.m_tolerance = MIN_TOLERANCE;
 
-    if (this.motionSmoothing < MIN_MOTION_SMOOTHING) this.motionSmoothing = MIN_MOTION_SMOOTHING;
-    if (this.motionSmoothing > MAX_MOTION_SMOOTHING) this.motionSmoothing = MAX_MOTION_SMOOTHING;
+    if (this.m_motionSmoothing < MIN_MOTION_SMOOTHING) this.m_motionSmoothing = MIN_MOTION_SMOOTHING;
+    if (this.m_motionSmoothing > MAX_MOTION_SMOOTHING) this.m_motionSmoothing = MAX_MOTION_SMOOTHING;
 
-    this.motionMagic = true;
+    this.m_motionMagic = true;
   }
 
   /**
@@ -150,10 +153,10 @@ public class TalonPIDConfig {
     talon.configSelectedFeedbackSensor(feedbackDevice);
     
     // Configure forward and reverse soft limits
-    if (this.enableSoftLimits) {
-      talon.configForwardSoftLimitThreshold((int)this.upperLimit);
+    if (this.m_enableSoftLimits) {
+      talon.configForwardSoftLimitThreshold((int)m_upperLimit);
       talon.configForwardSoftLimitEnable(true);
-      talon.configReverseSoftLimitThreshold((int)this.lowerLimit);
+      talon.configReverseSoftLimitThreshold((int)m_lowerLimit);
       talon.configReverseSoftLimitEnable(true);
     }
 
@@ -164,155 +167,112 @@ public class TalonPIDConfig {
       talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 
     // Set sensor phase and invert motor if required
-    talon.setSensorPhase(this.sensorPhase);
-    talon.setInverted(this.invertMotor);
+    talon.setSensorPhase(m_sensorPhase);
+    talon.setInverted(m_invertMotor);
 
     // Configure PID values
-    talon.config_kP(PID_SLOT, this.kP);
-    talon.config_kI(PID_SLOT, this.kI);
-    talon.config_kD(PID_SLOT, this.kD);
-    talon.config_kF(PID_SLOT, this.kF);
-    talon.configAllowableClosedloopError(PID_SLOT, (int)this.tolerance);
-    talon.configClosedLoopPeakOutput(PID_SLOT, 1);
+    talon.config_kP(PID_SLOT, m_kP);
+    talon.config_kI(PID_SLOT, m_kI);
+    talon.config_kD(PID_SLOT, m_kD);
+    talon.configAllowableClosedloopError(PID_SLOT, (int)m_tolerance);
+    talon.configClosedLoopPeakOutput(PID_SLOT, 1.0);
 
     // Configure MotionMagic values
-    if (this.motionMagic) {
-      talon.configMotionCruiseVelocity(rpmToTicksPer100ms(this.velocityRPM));
-      talon.configMotionAcceleration(rpmToTicksPer100ms(this.accelerationRPMPerSec));
-      talon.configMotionSCurveStrength(this.motionSmoothing);
-    }
-  }
-
-   /**
-   * Initializes Talon PID and/or MotionMagic parameters
-   * @param feedbackDevice Feedback device to use for Talon PID
-   */
-  public void initializeTalonPID(WPI_TalonFX talon, TalonFXFeedbackDevice feedbackDevice, boolean forwardLimitSwitch, boolean reverseLimitSwitch) {
-    // Reset Talon to default
-    talon.configFactoryDefault();
-
-    // Configure feedback sensor
-    talon.configSelectedFeedbackSensor(feedbackDevice, 0, 0);
-    
-    // Configure forward and reverse soft limits
-    if (this.enableSoftLimits) {
-      talon.configForwardSoftLimitThreshold((int)this.upperLimit);
-      talon.configForwardSoftLimitEnable(true);
-      talon.configReverseSoftLimitThreshold((int)this.lowerLimit);
-      talon.configReverseSoftLimitEnable(true);
-    }
-
-    // Configure forward and reverse limit switches if required
-    if (forwardLimitSwitch) 
-      talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-    if (reverseLimitSwitch)
-      talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-
-    // Set sensor phase and invert motor if required
-    talon.setSensorPhase(this.sensorPhase);
-    talon.setInverted(this.invertMotor);
-
-    // Configure PID values
-    talon.config_kP(PID_SLOT, this.kP);
-    talon.config_kI(PID_SLOT, this.kI);
-    talon.config_kD(PID_SLOT, this.kD);
-    talon.config_kF(PID_SLOT, this.kF);
-    talon.configAllowableClosedloopError(PID_SLOT, (int)this.tolerance);
-    talon.configClosedLoopPeakOutput(PID_SLOT, 1);
-
-    // Configure MotionMagic values
-    if (this.motionMagic) {
-      talon.configMotionCruiseVelocity(rpmToTicksPer100ms(this.velocityRPM));
-      talon.configMotionAcceleration(rpmToTicksPer100ms(this.accelerationRPMPerSec));
-      talon.configMotionSCurveStrength(this.motionSmoothing);
-    }
+    if (m_motionMagic) {
+      double speedInTicks = rpmToTicksPer100ms(m_velocityRPM);
+      m_kF = ((speedInTicks / rpmToTicksPer100ms(m_maxRPM)) * 1023) / speedInTicks;
+      talon.config_kF(PID_SLOT, m_kF);
+      talon.configMotionCruiseVelocity(rpmToTicksPer100ms(m_velocityRPM));
+      talon.configMotionAcceleration(rpmToTicksPer100ms(m_accelerationRPMPerSec));
+      talon.configMotionSCurveStrength(m_motionSmoothing);
+    } else talon.config_kF(PID_SLOT, m_kF);
   }
 
   private int rpmToTicksPer100ms(double rpm) {
-    return (int)((rpm * 4096) / 10);
+    return (int)((rpm * m_ticksPerRotation) / 600);
   }
 
   /**
    * @return sensor phase
    */
   public boolean getSensorPhase() {
-    return sensorPhase;
+    return m_sensorPhase;
   }
 
   /**
    * @return whether motor should be inverted or not
    */
   public boolean getInvertMotor() {
-    return invertMotor;
+    return m_invertMotor;
   }
 
   /**
    * @return proportional gain
    */
   public double getkP() {
-    return kP;
+    return m_kP;
   }
 
   /**
    * @return integral gain
    */
   public double getkI() {
-    return kI;
+    return m_kI;
   }
 
   /**
    * @return derivative gain
    */
   public double getkD() {
-    return kD;
+    return m_kD;
   }
 
   /**
    * @return feed-forward gain
    */
   public double getkF() {
-    return kF;
+    return m_kF;
   }
 
   /**
    * @return PID loop tolerance
    */
   public double getTolerance() {
-    return tolerance;
+    return m_tolerance;
   }
 
   /**
    * @return lower limit of mechanism
    */
   public double getLowerLimit() {
-    return lowerLimit;
+    return m_lowerLimit;
   }
 
   /**
    * @return upper limit of mechanism
    */
   public double getUpperLimit() {
-    return upperLimit;
+    return m_upperLimit;
   }
 
   /**
    * @return MotionMagic cruise velocity in RPM
    */
   public double getVelocityRPM() {
-    return velocityRPM;
+    return m_velocityRPM;
   }
 
   /**
    * @return MotionMagic acceleration in RPM per sec
    */
   public double getAccelerationRPMPerSec() {
-    return accelerationRPMPerSec;
+    return m_accelerationRPMPerSec;
   }
 
   /**
    * @return MotionMagic smoothing factor
    */
   public int getMotionSmoothing() {
-    return motionSmoothing;
+    return m_motionSmoothing;
   }
 }

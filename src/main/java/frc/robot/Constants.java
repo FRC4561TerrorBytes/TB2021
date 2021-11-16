@@ -48,16 +48,28 @@ public final class Constants {
     public static final double TURN_DAMPER = 0.1; // [0, 1]
 		public static final double TURRET_TURN_DAMPER = 0.15; // [0, 1]
 
+    // Motor RPMs, encoder values, and gear ratios
+    public static final int FALCON_500_MAX_RPM = 6380;
+    public static final int BAG_MAX_RPM = 13180;
+    public static final int CTRE_MAG_ENCODER_TICKS_PER_ROTATION = 4096;
+    public static final int CTRE_TALONFX_ENCODER_TICKS_PER_ROTATION = 2048;
+
+    public static final double TURRET_GEAR_RATIO_BEFORE_ENCODER = 2.0 / 1.0;
+    public static final double TURRET_GEAR_RATIO_AFTER_ENCODER = 94.0 / 15.0;
+    public static final double HOOD_GEAR_RATIO_BEFORE_ENCODER = 298.0 / 25.0;
+    public static final double HOOD_GEAR_RATIO_AFTER_ENCODER = 1.0 / 1.0;
+
     // Intake Arm PID config
     private static final double ARM_kP = 12.0;
     private static final double ARM_kD = 4.0;
-    private static final double ARM_kF = 0.000;
     private static final double ARM_TOLERANCE = 10;
     private static final double ARM_LOWER_LIMIT = -1500;
     private static final double ARM_UPPER_LIMIT = 0;
     private static final double ARM_VELOCITY = 1;
     private static final double ARM_ACCLERATION = 0.1;
     private static final int ARM_MOTION_SMOOTHING = 7;
+    private static final int ARM_TICKS_PER_ROTATION = CTRE_MAG_ENCODER_TICKS_PER_ROTATION;
+    private static final int ARM_MAX_RPM = 0;
     private static final boolean ARM_SOFT_LIMITS = true;
     private static final boolean ARM_SENSOR_PHASE = true;
     private static final boolean ARM_INVERT_MOTOR = false;
@@ -80,9 +92,11 @@ public final class Constants {
     private static final double HOOD_kD = 0.01;
     private static final double HOOD_TOLERANCE = 5.0;
     private static final boolean HOOD_SOFT_LIMITS = false;
-    private static final double HOOD_VELOCITY = 100;
-    private static final double HOOD_ACCELERATION = 50;
+    private static final double HOOD_VELOCITY = 100 * HOOD_GEAR_RATIO_AFTER_ENCODER;
+    private static final double HOOD_ACCELERATION = 50 * HOOD_GEAR_RATIO_AFTER_ENCODER;
     private static final int HOOD_MOTION_SMOOTHING = 3;
+    private static final double HOOD_TICKS_PER_ROTATION = CTRE_MAG_ENCODER_TICKS_PER_ROTATION;
+    private static final double HOOD_MAX_RPM = BAG_MAX_RPM * HOOD_GEAR_RATIO_BEFORE_ENCODER;
     private static final boolean HOOD_ENCODER_SENSOR_PHASE = false;
     private static final boolean HOOD_MOTOR_INVERTED = false;
     public static final int HOOD_BOTTOM_POSITION = 0;
@@ -92,9 +106,11 @@ public final class Constants {
     private static final double TURRET_kD = 0.02;
     private static final double TURRET_TOLERANCE = 80;
     private static final boolean TURRET_SOFT_LIMITS = true;
-    private static final double TURRET_VELOCITY = 150;
-    private static final double TURRET_ACCELERATION = 50;
-    private static final int TURRET_MOTION_SMOOTHING = 4; // between [0, 7]
+    private static final double TURRET_VELOCITY = 10 * TURRET_GEAR_RATIO_AFTER_ENCODER;
+    private static final double TURRET_ACCELERATION = 2 * TURRET_GEAR_RATIO_AFTER_ENCODER;
+    private static final int TURRET_MOTION_SMOOTHING = 4;
+    private static final double TURRET_TICKS_PER_ROTATION = CTRE_MAG_ENCODER_TICKS_PER_ROTATION;
+    private static final double TURRET_MAX_RPM = BAG_MAX_RPM / TURRET_GEAR_RATIO_BEFORE_ENCODER;
     private static final boolean TURRET_ENCODER_SENSOR_PHASE = false;
     private static final boolean TURRET_MOTOR_INVERTED = false;
     
@@ -112,16 +128,17 @@ public final class Constants {
                                                                                     FLYWHEEL_kP,
                                                                                     FLYWHEEL_kI,
                                                                                     FLYWHEEL_kD,
-                                                                                    0,
+                                                                                    0.0,
                                                                                     FLYWHEEL_TOLERANCE);
                                    
     // Set PID for Hood
     public static final TalonPIDConfig HOOD_CONFIG = new TalonPIDConfig(HOOD_ENCODER_SENSOR_PHASE,
                                                                         HOOD_MOTOR_INVERTED,
+                                                                        HOOD_TICKS_PER_ROTATION,
+                                                                        HOOD_MAX_RPM,
                                                                         HOOD_kP,
-                                                                        0,
+                                                                        0.0,
                                                                         HOOD_kD,
-                                                                        0,
                                                                         HOOD_TOLERANCE,
                                                                         HOOD_TOP_POSITION,
                                                                         HOOD_BOTTOM_POSITION,
@@ -133,10 +150,11 @@ public final class Constants {
     // Set PID for Turret
     public static final TalonPIDConfig TURRET_CONFIG = new TalonPIDConfig(TURRET_ENCODER_SENSOR_PHASE,
                                                                             TURRET_MOTOR_INVERTED,
+                                                                            TURRET_TICKS_PER_ROTATION,
+                                                                            TURRET_MAX_RPM,
                                                                             TURRET_kP,
-                                                                            0,
+                                                                            0.0,
                                                                             TURRET_kD,
-                                                                            0,
                                                                             TURRET_TOLERANCE,
                                                                             TURRET_FRONT_LIMIT_POSITION,
                                                                             TURRET_BACK_LIMIT_POSITION,
@@ -151,10 +169,11 @@ public final class Constants {
     // Arm Config
     public static final TalonPIDConfig ARM_CONFIG = new TalonPIDConfig(ARM_SENSOR_PHASE,
                                                                         ARM_INVERT_MOTOR,
+                                                                        ARM_TICKS_PER_ROTATION,
+                                                                        ARM_MAX_RPM,
                                                                         ARM_kP,
                                                                         0.0,
                                                                         ARM_kD,
-                                                                        ARM_kF,
                                                                         ARM_TOLERANCE,
                                                                         ARM_LOWER_LIMIT,
                                                                         ARM_UPPER_LIMIT,
@@ -167,8 +186,8 @@ public final class Constants {
     public static final double DEADBAND = 0.009;
     
     // Joystick Ports
-    public static final int RIGHT_JOYSTICK_PORT = 1;
     public static final int LEFT_JOYSTICK_PORT = 0;
+    public static final int RIGHT_JOYSTICK_PORT = 1;
 
     // Xbox controller
     public static final int XBOX_CONTROLLER_PORT = 2;    

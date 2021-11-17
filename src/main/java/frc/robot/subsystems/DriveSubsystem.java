@@ -265,7 +265,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param power exponent for drive response curve. 1 is linear response
    */
   public void teleopPID(double speedRequest, double turnRequest) {
-    double angle = getAngle();
+    double currentAngle = getAngle();
 
     // Set drive speed if it is more than the deadband
     speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest);
@@ -274,18 +274,18 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Start turning if input is greater than deadband
     if (Math.abs(turnRequest) >= DEADBAND) {
       // Add delta to setpoint scaled by factor
-      m_drivePIDController.setSetpoint(angle + (turnRequest * m_turnScalar));
+      m_drivePIDController.setSetpoint(currentAngle + (turnRequest * m_turnScalar));
       m_wasTurning = true;
     } else { 
       // When turning is complete, set setpoint to current angle
       if (m_wasTurning) {
-        m_drivePIDController.setSetpoint(angle);
+        m_drivePIDController.setSetpoint(currentAngle);
         m_wasTurning = false;
       }
     }
 
     // Calculate next PID turn output
-    double turnOutput = m_drivePIDController.calculate(angle);
+    double turnOutput = m_drivePIDController.calculate(currentAngle);
 
     double inertialVelocity = getInertialVelocity();
 
@@ -305,6 +305,21 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Run motors with appropriate values
     m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);
     m_rMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, +turnOutput);
+  }
+
+  /**
+   * Turn robot by angleDelta
+   * @param angleDelta degrees to turn robot by
+   */
+  public void aimToAngle(double angleDelta) {
+    double currentAngle = getAngle();
+
+    m_drivePIDController.setSetpoint(currentAngle + angleDelta);
+
+    double turnOutput = m_drivePIDController.calculate(currentAngle);
+
+    m_lMasterMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, -turnOutput);
+    m_rMasterMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, +turnOutput);
   }
 
   /**

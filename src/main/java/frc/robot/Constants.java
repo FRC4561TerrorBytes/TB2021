@@ -84,8 +84,8 @@ public final class Constants {
     private static final double FLYWHEEL_kP = 1.15;
     private static final double FLYWHEEL_kI = 0.98;
     private static final double FLYWHEEL_kD = 0.11;
-    private static final double FLYWHEEL_kF =  1023.0 / 21777.0666;
-    private static final double FLYWHEEL_TOLERANCE = 2500;
+    private static final double FLYWHEEL_TOLERANCE = 100;
+    private static final double FLYWHEEL_MAX_RPM = FALCON_500_MAX_RPM;
     private static final boolean FLYWHEEL_MASTER_ENCODER_SENSOR_PHASE = false;
     private static final boolean FLYWHEEL_MASTER_MOTOR_INVERTED = false;
 
@@ -126,10 +126,10 @@ public final class Constants {
     // Set PID for Flywheel
     public static final TalonPIDConfig FLYWHEEL_MASTER_CONFIG = new TalonPIDConfig(FLYWHEEL_MASTER_ENCODER_SENSOR_PHASE,
                                                                                     FLYWHEEL_MASTER_MOTOR_INVERTED,
+                                                                                    FLYWHEEL_MAX_RPM,
                                                                                     FLYWHEEL_kP,
                                                                                     FLYWHEEL_kI,
                                                                                     FLYWHEEL_kD,
-                                                                                    FLYWHEEL_kF,
                                                                                     FLYWHEEL_TOLERANCE);
                                    
     // Set PID for Hood

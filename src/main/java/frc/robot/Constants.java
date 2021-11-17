@@ -37,7 +37,7 @@ public final class Constants {
     public static final double DRIVE_TURN_SCALAR = 30.0;
     public static final double DRIVE_TOLERANCE = 0.25;
     public static final String DRIVE_TRACTION_CONTROL_CURVE = "X / 4";
-    public static final String DRIVE_THROTTLE_INPUT_CURVE = "4.106 * X";
+    public static final String DRIVE_THROTTLE_INPUT_CURVE = "Math.pow(X, 2)";
     public static final int DRIVE_RESPONSE_EXPONENT = 1;
 
     // Auto drive config values
@@ -84,6 +84,7 @@ public final class Constants {
     private static final double FLYWHEEL_kP = 1.15;
     private static final double FLYWHEEL_kI = 0.98;
     private static final double FLYWHEEL_kD = 0.11;
+    private static final double FLYWHEEL_kF =  1023.0 / 21777.0666;
     private static final double FLYWHEEL_TOLERANCE = 2500;
     private static final boolean FLYWHEEL_MASTER_ENCODER_SENSOR_PHASE = false;
     private static final boolean FLYWHEEL_MASTER_MOTOR_INVERTED = false;
@@ -128,7 +129,7 @@ public final class Constants {
                                                                                     FLYWHEEL_kP,
                                                                                     FLYWHEEL_kI,
                                                                                     FLYWHEEL_kD,
-                                                                                    0.0,
+                                                                                    FLYWHEEL_kF,
                                                                                     FLYWHEEL_TOLERANCE);
                                    
     // Set PID for Hood

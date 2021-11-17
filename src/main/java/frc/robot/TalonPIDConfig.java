@@ -179,8 +179,7 @@ public class TalonPIDConfig {
 
     // Configure MotionMagic values
     if (m_motionMagic) {
-      double speedInTicks = rpmToTicksPer100ms(m_velocityRPM);
-      m_kF = ((speedInTicks / rpmToTicksPer100ms(m_maxRPM)) * 1023) / speedInTicks;
+      m_kF = 1023 / rpmToTicksPer100ms(m_maxRPM);
       talon.config_kF(PID_SLOT, m_kF);
       talon.configMotionCruiseVelocity(rpmToTicksPer100ms(m_velocityRPM));
       talon.configMotionAcceleration(rpmToTicksPer100ms(m_accelerationRPMPerSec));

@@ -274,10 +274,7 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
     speed = MathUtil.clamp(speed, 0, Flywheel.MAX_SPEED_RPM);
     double speedInTicks = Flywheel.rpmToTicksPer100ms(speed);
 
-    // PID controller on Talon uses 1023 as "full output"
-    double kF = ((speedInTicks / Flywheel.rpmToTicksPer100ms(Flywheel.MAX_SPEED_RPM)) * 1023) / speedInTicks;
-
-    Flywheel.masterMotor.config_kF(0, kF);
+    // PID controller on Talon uses 1023 as "full output" 
     Flywheel.masterMotor.set(ControlMode.Velocity, speedInTicks);
   }
 

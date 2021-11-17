@@ -85,9 +85,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
   private final double DRIVETRAIN_EFFICIENCY = 0.88;
   private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //4.106 m/s
-  private final double WHEEL_SLIP_LIMIT = 0.03;
+  private final double WHEEL_SLIP_LIMIT = 0.08;
   private final double INERTIAL_VELOCITY_THRESHOLD = 0.005;
-  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 60;
+  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 30;
   private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
 
   private final double MIN_TOLERANCE = 0.125;
@@ -165,12 +165,13 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("rhino");
 
       // Fill traction control hashmap
-      for (int i = 0; i <= MAX_LINEAR_SPEED * 1000; i++) {
+      int maxSpeedCount = (int)(MAX_LINEAR_SPEED * 1000.0);
+      for (int i = -maxSpeedCount; i <= maxSpeedCount; i++) {
         double key = (double)i / 1000;
         try {
           // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, 1.0]
           double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
-          value = MathUtil.clamp(value, 0.0, 1.0);
+          value = MathUtil.clamp(value, -1.0, +1.0);
           m_tractionControlMap.put(key, value);
         } catch (ScriptException e) {
           DriverStation.reportError(e.getMessage(), true);
@@ -269,7 +270,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Set drive speed if it is more than the deadband
     speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest);
-    double requestedLinearSpeed = m_throttleInputMap.get(Math.abs(speedRequest));
+    double requestedLinearSpeed = Math.copySign(m_throttleInputMap.get(Math.abs(speedRequest)), speedRequest);
 
     // Start turning if input is greater than deadband
     if (Math.abs(turnRequest) >= DEADBAND) {
@@ -293,14 +294,14 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double requestedAcceleration = requestedLinearSpeed - inertialVelocity;
     requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration * 100)) / 100, requestedAcceleration);
 
-    // Apply slip ratio to requested acceleration to limit wheel slip
+    // Apply slip limit to requested acceleration to limit wheel slip
     requestedAcceleration = Math.copySign(Math.abs(requestedAcceleration * WHEEL_SLIP_LIMIT), requestedAcceleration);
 
-    // Calculate optimal velocity and truncate value to 3 decimal places and clamp between zero and maximum linear speed
-    double velocityLookup = MathUtil.clamp(Math.floor((inertialVelocity + requestedAcceleration) * 1000) / 1000, 0.0, MAX_LINEAR_SPEED);
+    // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
+    double velocityLookup = MathUtil.clamp(Math.floor((inertialVelocity + requestedAcceleration) * 1000) / 1000, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
 
     // Lookup optimal motor speed output
-    double optimalSpeedOutput = Math.copySign(m_tractionControlMap.get(velocityLookup), speedRequest);
+    double optimalSpeedOutput = m_tractionControlMap.get(velocityLookup);
 
     // Run motors with appropriate values
     m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);
@@ -430,7 +431,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     m_inertialVelocitySum = m_inertialVelocitySum - INERTIAL_VELOCITY_READINGS[m_inertialVelocityIndex];
 
     // Get latest reading from NAVX
-    double latestReading = Math.min(Math.sqrt(Math.pow(m_navx.getVelocityX(), 2) + Math.pow(m_navx.getVelocityY(), 2)), MAX_LINEAR_SPEED);
+    double latestReading = MathUtil.clamp(m_navx.getVelocityY(), -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
 
     // Add latest reading to array
     INERTIAL_VELOCITY_READINGS[m_inertialVelocityIndex] = latestReading;
@@ -451,7 +452,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public double getInertialVelocity() {
     // Return the latest moviing average, ignoring really small values
-    return (m_inertialVelocity >= INERTIAL_VELOCITY_THRESHOLD) ? 
+    return (Math.abs(m_inertialVelocity) >= INERTIAL_VELOCITY_THRESHOLD) ? 
             m_inertialVelocity : 
             0;
   }

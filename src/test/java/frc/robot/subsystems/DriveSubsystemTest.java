@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
 import edu.wpi.first.wpilibj.Counter;
@@ -69,8 +71,7 @@ public class DriveSubsystemTest {
   public void forward() {
     // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
-    when(m_navx.getVelocityX()).thenReturn((float)4.106);
-    when(m_navx.getVelocityY()).thenReturn((float)0.0);
+    when(m_navx.getVelocityY()).thenReturn((float)4.106);
 
     // Fill up velocity moving average buffer by calling periodic
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
@@ -91,8 +92,7 @@ public class DriveSubsystemTest {
   public void reverse() {
     // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
-    when(m_navx.getVelocityX()).thenReturn((float)4.106);
-    when(m_navx.getVelocityY()).thenReturn((float)0.0);
+    when(m_navx.getVelocityY()).thenReturn((float)-4.106);
 
     // Fill up velocity moving average buffer by calling periodic
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
@@ -109,6 +109,49 @@ public class DriveSubsystemTest {
 
   @Test
   @Order(3)
+  @DisplayName("Test if robot can reverse direction using PID drive")
+  public void reverseDirection() {
+    // Initial velocity
+    double velocity = 2.053;
+    when(m_navx.getVelocityY()).thenReturn((float)velocity);
+
+    // Argument capture objects
+    ArgumentCaptor<Double> lMotorOutputs = ArgumentCaptor.forClass(Double.class);
+    ArgumentCaptor<Double> rMotorOutputs = ArgumentCaptor.forClass(Double.class);
+
+    // Hardcode NAVX sensor value for angle
+    when(m_navx.getAngle()).thenReturn(0.0);
+
+    // Fill up velocity moving average buffer by calling periodic
+    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+
+    // Simulate NAVX sensor deceleration
+    for (int i = 0; i < 90; i++) {
+      velocity = (velocity <= -2.053) ?
+                  -2.053 :
+                  velocity - 0.08;
+      when(m_navx.getVelocityY()).thenReturn((float)velocity);
+
+      // Try to reverse direction
+      m_driveSubsystem.teleopPID(-0.5, 0.0);
+      m_driveSubsystem.periodic();
+    }
+
+    // Verify that left and right motors are being driven and capture output
+    verify(m_lMasterMotor, times(90)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), lMotorOutputs.capture(), 
+                                            ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+    verify(m_rMasterMotor, times(90)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), rMotorOutputs.capture(), 
+                                            ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
+
+    // Check that last motor output value was as expected
+    double lMotorOutput = lMotorOutputs.getAllValues().get(lMotorOutputs.getAllValues().size() - 1);
+    double rMotorOutput = rMotorOutputs.getAllValues().get(rMotorOutputs.getAllValues().size() - 1);
+    assertTrue(Math.abs(-0.5 - lMotorOutput) <= DELTA);
+    assertTrue(Math.abs(-0.5 - rMotorOutput) <= DELTA);
+  }
+
+  @Test
+  @Order(4)
   @DisplayName("Test if robot can stop using PID drive")
   public void stop() {
     // Hardcode NAVX sensor return value for angle
@@ -125,13 +168,12 @@ public class DriveSubsystemTest {
   }
 
   @Test
-  @Order(4)
+  @Order(5)
   @DisplayName("Test if robot ignores small turn input values under threshold")
   public void ignoreSmallTurnInput() {
     // Hardcode NAVX sensor return values for angle, velocityX, velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
-    when(m_navx.getVelocityX()).thenReturn((float)4.106);
-    when(m_navx.getVelocityY()).thenReturn((float)0.0);
+    when(m_navx.getVelocityY()).thenReturn((float)4.106);
 
     // Fill up velocity moving average buffer by calling periodic
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
@@ -147,7 +189,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
-  @Order(5)
+  @Order(6)
   @DisplayName("Test if robot can turn left using PID drive")
   public void turningLeft() {
     // Hardcode NAVX sensor return value for angle
@@ -164,7 +206,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
-  @Order(6)
+  @Order(7)
   @DisplayName("Test if robot can turn right using PID drive")
   public void turningRight() {
     // Hardcode NAVX sensor return value for angle
@@ -181,12 +223,11 @@ public class DriveSubsystemTest {
   }
 
   @Test
-  @Order(7)
+  @Order(8)
   @DisplayName("Test if robot will limit wheel slip")
   public void tractionControl() {
     // Hardcode NAVX sensor values for angle, velocityX, and velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
-    when(m_navx.getVelocityX()).thenReturn((float)0.0);
     when(m_navx.getVelocityY()).thenReturn((float)0.0);
 
     // Fill up velocity moving average buffer by calling periodic
@@ -196,9 +237,9 @@ public class DriveSubsystemTest {
     m_driveSubsystem.teleopPID(1.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
-    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.04), AdditionalMatchers.gt(0.0)), 
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.09), AdditionalMatchers.gt(0.0)), 
                                           ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
-    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.04), AdditionalMatchers.gt(0.0)), 
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.09), AdditionalMatchers.gt(0.0)), 
                                           ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 

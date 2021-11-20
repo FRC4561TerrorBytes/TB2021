@@ -28,7 +28,7 @@ public final class Constants {
     public static final boolean CLIMBER_DEBUG = false;
     
     // Robot tick rate in seconds
-    public static final double ROBOT_TICK_RATE = 1 / 60;
+    public static final double ROBOT_LOOP_PERIOD = 1.0 / 60.0;
 
     // Drive PID values
     public static final double DRIVE_kP = 0.018; //0.018
@@ -36,8 +36,8 @@ public final class Constants {
     public static final double DRIVE_PERIOD_SECONDS = 1 / 50;
     public static final double DRIVE_TURN_SCALAR = 30.0;
     public static final double DRIVE_TOLERANCE = 0.25;
-    public static final String DRIVE_TRACTION_CONTROL_CURVE = "X / 4";
-    public static final String DRIVE_THROTTLE_INPUT_CURVE = "Math.pow(X, 2)";
+    public static final String DRIVE_TRACTION_CONTROL_CURVE = "X / 4.106";
+    public static final String DRIVE_THROTTLE_INPUT_CURVE = "4.106 * X";
     public static final int DRIVE_RESPONSE_EXPONENT = 1;
 
     // Auto drive config values
@@ -86,6 +86,7 @@ public final class Constants {
     private static final double FLYWHEEL_kD = 0.11;
     private static final double FLYWHEEL_TOLERANCE = 100;
     private static final double FLYWHEEL_MAX_RPM = FALCON_500_MAX_RPM;
+    private static final double FLYWHEEL_TICKS_PER_ROTATION = CTRE_TALONFX_ENCODER_TICKS_PER_ROTATION;
     private static final boolean FLYWHEEL_MASTER_ENCODER_SENSOR_PHASE = false;
     private static final boolean FLYWHEEL_MASTER_MOTOR_INVERTED = false;
 
@@ -127,6 +128,7 @@ public final class Constants {
     public static final TalonPIDConfig FLYWHEEL_MASTER_CONFIG = new TalonPIDConfig(FLYWHEEL_MASTER_ENCODER_SENSOR_PHASE,
                                                                                     FLYWHEEL_MASTER_MOTOR_INVERTED,
                                                                                     FLYWHEEL_MAX_RPM,
+                                                                                    FLYWHEEL_TICKS_PER_ROTATION,
                                                                                     FLYWHEEL_kP,
                                                                                     FLYWHEEL_kI,
                                                                                     FLYWHEEL_kD,

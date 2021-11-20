@@ -123,7 +123,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double tolerance, double turn_scalar, String tractionControlCurve, String throttleInputCurve) {
       // The PIDController used by the subsystem
-      m_drivePIDController = new PIDController(kP, 0, kD);
+      m_drivePIDController = new PIDController(kP, 0, kD, Constants.ROBOT_LOOP_PERIOD);
 
       this.m_lMasterMotor = drivetrainHardware.lMasterMotor;
       this.m_rMasterMotor = drivetrainHardware.rMasterMotor;
@@ -169,7 +169,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       for (int i = -maxSpeedCount; i <= maxSpeedCount; i++) {
         double key = (double)i / 1000;
         try {
-          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, 1.0]
+          // Evaluate JavaScript, replacing "X" with value and clamp value between [-1.0, +1.0]
           double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
           value = MathUtil.clamp(value, -1.0, +1.0);
           m_tractionControlMap.put(key, value);
@@ -182,7 +182,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       for (int i = 0; i <= 1000; i++) {
         double key = (double)i / 1000;
         try {
-          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, 1.0]
+          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, MAX_LINEAR_SPEED]
           double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(key))).toString());
           value = MathUtil.clamp(value, 0.0, MAX_LINEAR_SPEED);
           m_throttleInputMap.put(key, value);

@@ -291,7 +291,6 @@ public class ShooterSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public void flywheelStop() {
     Flywheel.masterMotor.set(0);
-    Flywheel.masterMotor.config_kF(0, 0.0);
     Flywheel.masterMotor.setIntegralAccumulator(0);
   }
 

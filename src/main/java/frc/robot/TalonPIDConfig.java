@@ -47,18 +47,21 @@ public class TalonPIDConfig {
    * 
    * @param sensorPhase set sensor phase of encoder
    * @param invertMotor invert motor or not
+   * @param maxRPM max RPM of encoder
+   * @param ticksPerRotation number of ticks in one encoder revolution
    * @param kP proportional gain
    * @param kI integral gain
    * @param kD derivative gain
-   * @param kF feed-forward gain
    * @param tolerance tolerance of PID loop in ticks per 100ms
    */
-  TalonPIDConfig(boolean sensorPhase, boolean invertMotor, double maxRPM,
+  TalonPIDConfig(boolean sensorPhase, boolean invertMotor,
+                  double maxRPM, double ticksPerRotation,
                   double kP, double kI, double kD, 
                   double tolerance) {
     this.m_sensorPhase = sensorPhase;
     this.m_invertMotor = invertMotor;
     this.m_maxRPM = maxRPM;
+    this.m_ticksPerRotation = ticksPerRotation;
     this.m_kP = kP;
     this.m_kI = kI;
     this.m_kD = kD;
@@ -76,7 +79,7 @@ public class TalonPIDConfig {
    * 
    * @param sensorPhase set sensor phase of encoder
    * @param invertMotor invert motor or not
-   * @param ticksPerRotation number of ticks in one motor revolution
+   * @param ticksPerRotation number of ticks in one encoder revolution
    * @param maxRPM max RPM for this motor
    * @param kP proportional gain
    * @param kI integral gain
@@ -161,8 +164,8 @@ public class TalonPIDConfig {
     } 
   }
 
-  private int rpmToTicksPer100ms(double rpm) {
-    return (int)((rpm * m_ticksPerRotation) / 600);
+  private double rpmToTicksPer100ms(double rpm) {
+    return (rpm * m_ticksPerRotation) / 600;
   }
 
   /**

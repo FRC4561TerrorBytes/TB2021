@@ -58,7 +58,7 @@ public class ShooterSubsystemTest {
   public void spinFlywheel() {
     m_shooterSubsystem.setFlywheelSpeed(5400);
 
-    verify(m_flywheelMasterMotor, times(1)).config_kF(ArgumentMatchers.eq(0), AdditionalMatchers.eq(0.046976023, DELTA));
+    //verify(m_flywheelMasterMotor, times(1)).config_kF(ArgumentMatchers.eq(0), AdditionalMatchers.eq(0.046976023, DELTA));
     verify(m_flywheelMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.Velocity), AdditionalMatchers.eq(18432, DELTA));
   }
 
@@ -69,7 +69,6 @@ public class ShooterSubsystemTest {
     m_shooterSubsystem.flywheelStop();
     
     verify(m_flywheelMasterMotor, times(1)).set(AdditionalMatchers.eq(0.0, DELTA));
-    verify(m_flywheelMasterMotor, times(2)).config_kF(ArgumentMatchers.eq(0), AdditionalMatchers.eq(0.0, DELTA));
     assertEquals(0.0, m_flywheelMasterMotor.getIntegralAccumulator(), DELTA);
   }
   

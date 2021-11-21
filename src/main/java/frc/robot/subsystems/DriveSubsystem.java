@@ -75,7 +75,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private Counter m_lidar;
   private final double LIDAR_OFFSET = 10.0;
 
-  private final double DEADBAND = 0.001;
+  private final double TURN_DEADBAND = 0.005;
   private final double WHEEL_DIAMETER_METERS = 0.1524;
   private final double MOTOR_MAX_RPM = 6380;
   private final double TICKS_PER_ROTATION = 2048;
@@ -145,11 +145,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       m_rMasterMotor.setNeutralMode(NeutralMode.Brake);
       m_rSlaveMotor.setNeutralMode(NeutralMode.Brake);
 
-      // Do NOT invert motors
+      // Invert only right side
       m_lMasterMotor.setInverted(false);
-      m_lSlaveMotor.setInverted(false);
-      m_rMasterMotor.setInverted(false);
-      m_rSlaveMotor.setInverted(false);
+      m_rMasterMotor.setInverted(true);
 
       // Make rear left motor controllers follow left master
       m_lSlaveMotor.set(ControlMode.Follower, m_lMasterMotor.getDeviceID());
@@ -273,7 +271,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double requestedLinearSpeed = Math.copySign(m_throttleInputMap.get(Math.abs(speedRequest)), speedRequest);
 
     // Start turning if input is greater than deadband
-    if (Math.abs(turnRequest) >= DEADBAND) {
+    if (Math.abs(turnRequest) >= TURN_DEADBAND) {
       // Add delta to setpoint scaled by factor
       m_drivePIDController.setSetpoint(currentAngle + (turnRequest * m_turnScalar));
       m_wasTurning = true;

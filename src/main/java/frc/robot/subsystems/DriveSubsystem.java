@@ -293,7 +293,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration * 100)) / 100, requestedAcceleration);
 
     // Apply slip limit to requested acceleration to limit wheel slip
-    requestedAcceleration = Math.copySign(Math.abs(requestedAcceleration * WHEEL_SLIP_LIMIT), requestedAcceleration);
+    requestedAcceleration = Math.copySign(Math.min(Math.abs(requestedAcceleration), (WHEEL_SLIP_LIMIT * inertialVelocity) + WHEEL_SLIP_LIMIT), requestedAcceleration);
 
     // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
     double velocityLookup = MathUtil.clamp(Math.floor((inertialVelocity + requestedAcceleration) * 1000) / 1000, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);

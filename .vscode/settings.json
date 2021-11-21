@@ -5,7 +5,7 @@
     {
         "name": "WPIlibUnitTests",
         "workingDirectory": "${workspaceFolder}/build/tmp/jniExtractDir",
-        "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/tmp/jniExtractDir", "-Dnashorn.args=--no-deprecation-warning" ],
+        "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/tmp/jniExtractDir" ],
         "env": { "LD_LIBRARY_PATH": "${workspaceFolder}/build/tmp/jniExtractDir" ,
           "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/tmp/jniExtractDir" }
         

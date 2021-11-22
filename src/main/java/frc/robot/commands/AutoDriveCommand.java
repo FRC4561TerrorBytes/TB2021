@@ -33,7 +33,7 @@ public class AutoDriveCommand extends CommandBase {
     // Damper required to not burn the carpet again
     // Turns the robot towards xAngle
     DRIVE_SUBSYSTEM.setDrivePIDSetpoint(
-        DRIVE_SUBSYSTEM.getDrivePIDController().getSetpoint() + Constants.TURN_DAMPER * robotToTargetAngle);
+        DRIVE_SUBSYSTEM.getDrivePIDSetpoint() + Constants.TURN_DAMPER * robotToTargetAngle);
 
     // If target is detected, move to a pre-defined distance
     // Checks if angle is within a certain value to prevent veering too far off course

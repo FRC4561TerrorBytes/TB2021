@@ -90,14 +90,13 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final int INERTIAL_VELOCITY_WINDOW_SIZE = 30;
   private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
 
-  private final double MIN_TOLERANCE = 0.125;
+  private final double TOLERANCE = 0.125;
 
   private double m_turnScalar = 1.0; 
   private double m_output = 0.0;
   private double m_inertialVelocity = 0.0;
   private double m_inertialVelocitySum = 0.0;
   private int m_inertialVelocityIndex = 0;
-  private double m_tolerance = 0;
 
   private boolean m_wasTurning = false;
 
@@ -121,7 +120,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param deadband Deadzone for joystick
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double tolerance, double turn_scalar, String tractionControlCurve, String throttleInputCurve) {
+  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, String tractionControlCurve, String throttleInputCurve) {
       // The PIDController used by the subsystem
       m_drivePIDController = new PIDController(kP, 0, kD, Constants.ROBOT_LOOP_PERIOD);
 
@@ -193,10 +192,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       resetAngle();
       m_drivePIDController.setSetpoint(0);
 
-      // Set drive PID tolerance, minimum is 0.125 degree
-      m_tolerance = tolerance;
-      if (m_tolerance < MIN_TOLERANCE) m_tolerance = MIN_TOLERANCE;
-      m_drivePIDController.setTolerance(m_tolerance);
+      // Set drive PID tolerance
+      m_drivePIDController.setTolerance(TOLERANCE);
 
       m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0));
       resetOdometry();
@@ -291,10 +288,17 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Get requested acceleration with minimum of 1 cm/sec^2
     double requestedAcceleration = requestedLinearSpeed - inertialVelocity;
     requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration * 100)) / 100, requestedAcceleration);
+    int isAccelerating = (requestedAcceleration != 0.0) ? 1 : 0;
 
     // Apply slip limit to requested acceleration to limit wheel slip
-    requestedAcceleration = Math.copySign(Math.min(Math.abs(requestedAcceleration), (WHEEL_SLIP_LIMIT * inertialVelocity) + WHEEL_SLIP_LIMIT), requestedAcceleration);
-
+    requestedAcceleration = Math.copySign(
+                                            Math.max(
+                                              Math.abs(requestedAcceleration * WHEEL_SLIP_LIMIT), 
+                                              Math.abs(inertialVelocity * WHEEL_SLIP_LIMIT * isAccelerating)
+                                            ), 
+                                            requestedAcceleration
+                                          );
+    
     // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
     double velocityLookup = MathUtil.clamp(Math.floor((inertialVelocity + requestedAcceleration) * 1000) / 1000, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
 
@@ -497,14 +501,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   /**
-   * Returns tolerance
-   * @return tolerance
-   */
-  public double getTolerance() {
-    return m_tolerance;
-  }
-
-  /**
    * Get Distance from LIDAR sensor
    * @return distance in Meters
    */
@@ -513,14 +509,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       return 0;
     else
       return ((m_lidar.getPeriod()*1000000.0/10.0) - LIDAR_OFFSET) / 100.0; //convert to distance. sensor is high 10 us for every centimeter. 
-  }
-
-  /**
-   * Get DriveSubsystem PID controller
-   * @return PID Controller
-   */
-  public PIDController getDrivePIDController() {
-    return m_drivePIDController;
   }
 
   /**

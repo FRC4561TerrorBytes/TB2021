@@ -25,7 +25,6 @@ import frc.robot.Constants;
 
 public class DriveSubsystemTest {
   public static final double DELTA = 1e-3;
-  public static final double ALTERNATE_DELTA = 3e-2;
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
 
@@ -54,7 +53,6 @@ public class DriveSubsystemTest {
     m_driveSubsystem = new DriveSubsystem(m_drivetrainHardware, 
                                           Constants.DRIVE_kP,
                                           Constants.DRIVE_kD, 
-                                          Constants.DRIVE_TOLERANCE,
                                           Constants.DRIVE_TURN_SCALAR,
                                           Constants.DRIVE_TRACTION_CONTROL_CURVE,
                                           Constants.DRIVE_THROTTLE_INPUT_CURVE);
@@ -147,8 +145,8 @@ public class DriveSubsystemTest {
     // Check that last motor output value was as expected
     double lMotorOutput = lMotorOutputs.getAllValues().get(lMotorOutputs.getAllValues().size() - 1);
     double rMotorOutput = rMotorOutputs.getAllValues().get(rMotorOutputs.getAllValues().size() - 1);
-    assertTrue(Math.abs(-0.5 - lMotorOutput) <= ALTERNATE_DELTA);
-    assertTrue(Math.abs(-0.5 - rMotorOutput) <= ALTERNATE_DELTA);
+    assertTrue(Math.abs(-0.5 - lMotorOutput) <= DELTA);
+    assertTrue(Math.abs(-0.5 - rMotorOutput) <= DELTA);
   }
 
   @Test

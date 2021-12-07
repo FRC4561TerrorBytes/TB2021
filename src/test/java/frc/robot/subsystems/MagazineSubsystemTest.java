@@ -10,12 +10,15 @@ import com.revrobotics.CANSparkMax;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.AdditionalMatchers;
 
 import frc.robot.Constants;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MagazineSubsystemTest {
   public static final double DELTA = 5e-3;
   private MagazineSubsystem m_magazineSubsystem;

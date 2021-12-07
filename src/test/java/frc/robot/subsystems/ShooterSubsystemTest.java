@@ -12,13 +12,16 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentMatchers;
 
 import frc.robot.Constants;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ShooterSubsystemTest {
   public static final double DELTA = 1e-3;
   private ShooterSubsystem m_shooterSubsystem;

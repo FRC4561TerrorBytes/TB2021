@@ -14,8 +14,10 @@ import com.kauailabs.navx.frc.AHRS;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -23,6 +25,7 @@ import org.mockito.ArgumentMatchers;
 import edu.wpi.first.wpilibj.Counter;
 import frc.robot.Constants;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DriveSubsystemTest {
   public static final double DELTA = 1e-3;
   private DriveSubsystem m_driveSubsystem;

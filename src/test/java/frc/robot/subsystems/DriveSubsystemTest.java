@@ -73,13 +73,13 @@ public class DriveSubsystemTest {
   public void forward() {
     // Hardcode NAVX sensor return values for angle, velocityX, and velocityY
     when(m_navx.getAngle()).thenReturn(0.0);
-    when(m_navx.getVelocityY()).thenReturn((float)3.0);
+    when(m_navx.getVelocityY()).thenReturn((float)4.106);
 
     // Fill up velocity moving average buffer by calling periodic
     for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive forward
-    m_driveSubsystem.teleopPID(0.0, 0.0);
+    m_driveSubsystem.teleopPID(1.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
     verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.eq(1.0, DELTA), 

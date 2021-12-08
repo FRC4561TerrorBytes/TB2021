@@ -146,7 +146,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
       // Invert only right side
       m_lMasterMotor.setInverted(false);
+      m_lSlaveMotor.setInverted(false);
       m_rMasterMotor.setInverted(true);
+      m_rSlaveMotor.setInverted(true);
 
       // Make rear left motor controllers follow left master
       m_lSlaveMotor.set(ControlMode.Follower, m_lMasterMotor.getDeviceID());

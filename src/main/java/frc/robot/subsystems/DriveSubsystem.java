@@ -119,6 +119,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param turn_scalar Turn sensitivity
    * @param deadband Deadzone for joystick
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
+   * @param throttleInputCurve Expression characterising throttle input with "X" as the variable
    */
   public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, String tractionControlCurve, String throttleInputCurve) {
       // The PIDController used by the subsystem
@@ -134,9 +135,11 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
       this.m_turnScalar = turn_scalar;
 
-      // Reset master TalonFX settings
+      // Reset TalonFX settings
       m_lMasterMotor.configFactoryDefault();
+      m_lSlaveMotor.configFactoryDefault();
       m_rMasterMotor.configFactoryDefault();
+      m_rSlaveMotor.configFactoryDefault();
 
       // Set all drive motors to brake
       m_lMasterMotor.setNeutralMode(NeutralMode.Brake);

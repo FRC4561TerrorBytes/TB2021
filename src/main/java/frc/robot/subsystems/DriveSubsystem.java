@@ -292,7 +292,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Get requested acceleration with minimum of 1 cm/sec^2
     double requestedAcceleration = requestedLinearSpeed - inertialVelocity;
-    requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration * 100)) / 100, requestedAcceleration);
+    requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration) * 100) / 100, requestedAcceleration);
     int isAccelerating = (requestedAcceleration != 0.0) ? 1 : 0;
 
     // Apply slip limit to requested acceleration to limit wheel slip
@@ -305,7 +305,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
                                           );
     
     // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
-    double velocityLookup = MathUtil.clamp(Math.floor((inertialVelocity + requestedAcceleration) * 1000) / 1000, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
+    double velocityLookup = inertialVelocity + requestedAcceleration;
+    velocityLookup = Math.copySign(Math.floor(Math.abs(velocityLookup) * 1000) / 1000, velocityLookup);
+    velocityLookup = MathUtil.clamp(velocityLookup, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
 
     // Lookup optimal motor speed output
     double optimalSpeedOutput = m_tractionControlMap.get(velocityLookup);

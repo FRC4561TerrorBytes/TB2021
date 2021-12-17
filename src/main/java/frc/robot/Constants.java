@@ -33,9 +33,8 @@ public final class Constants {
     // Drive PID values
     public static final double DRIVE_kP = 0.018; //0.018
     public static final double DRIVE_kD = 0.00029; //0.00029
-    public static final double DRIVE_PERIOD_SECONDS = 1 / 50;
     public static final double DRIVE_TURN_SCALAR = 30.0;
-    public static final double DRIVE_TOLERANCE = 0.25;
+    public static final double DRIVE_ACCELERATION_LIMIT = 0.5;
     public static final String DRIVE_TRACTION_CONTROL_CURVE = "X / 4.106";
     public static final String DRIVE_THROTTLE_INPUT_CURVE = "4.106 * X";
     public static final int DRIVE_RESPONSE_EXPONENT = 1;

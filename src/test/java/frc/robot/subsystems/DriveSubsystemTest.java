@@ -28,6 +28,7 @@ import frc.robot.Constants;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DriveSubsystemTest {
   public static final double DELTA = 1e-3;
+  public static final double ALT_DELTA = 2e-3;
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
 
@@ -57,6 +58,7 @@ public class DriveSubsystemTest {
                                           Constants.DRIVE_kP,
                                           Constants.DRIVE_kD, 
                                           Constants.DRIVE_TURN_SCALAR,
+                                          Constants.DRIVE_ACCELERATION_LIMIT,
                                           Constants.DRIVE_TRACTION_CONTROL_CURVE,
                                           Constants.DRIVE_THROTTLE_INPUT_CURVE);
   }
@@ -76,7 +78,7 @@ public class DriveSubsystemTest {
     when(m_navx.getVelocityY()).thenReturn((float)4.106);
 
     // Fill up velocity moving average buffer by calling periodic
-    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+    for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive forward
     m_driveSubsystem.teleopPID(1.0, 0.0);
@@ -97,7 +99,7 @@ public class DriveSubsystemTest {
     when(m_navx.getVelocityY()).thenReturn((float)-4.106);
 
     // Fill up velocity moving average buffer by calling periodic
-    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+    for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive in reverse
     m_driveSubsystem.teleopPID(-1.0, 0.0);
@@ -125,10 +127,10 @@ public class DriveSubsystemTest {
     when(m_navx.getAngle()).thenReturn(0.0);
 
     // Fill up velocity moving average buffer by calling periodic
-    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+    for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
 
     // Simulate NAVX sensor deceleration
-    for (int i = 0; i < 90; i++) {
+    for (int i = 0; i < 75; i++) {
       velocity = (velocity <= -2.053) ?
                   -2.053 :
                   velocity - 0.05;
@@ -140,16 +142,16 @@ public class DriveSubsystemTest {
     }
 
     // Verify that left and right motors are being driven and capture output
-    verify(m_lMasterMotor, times(90)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), lMotorOutputs.capture(), 
+    verify(m_lMasterMotor, times(75)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), lMotorOutputs.capture(), 
                                             ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
-    verify(m_rMasterMotor, times(90)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), rMotorOutputs.capture(), 
+    verify(m_rMasterMotor, times(75)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), rMotorOutputs.capture(), 
                                             ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
 
     // Check that last motor output value was as expected
     double lMotorOutput = lMotorOutputs.getAllValues().get(lMotorOutputs.getAllValues().size() - 1);
     double rMotorOutput = rMotorOutputs.getAllValues().get(rMotorOutputs.getAllValues().size() - 1);
-    assertTrue(Math.abs(-0.5 - lMotorOutput) <= DELTA);
-    assertTrue(Math.abs(-0.5 - rMotorOutput) <= DELTA);
+    assertTrue(Math.abs(-0.5 - lMotorOutput) <= ALT_DELTA);
+    assertTrue(Math.abs(-0.5 - rMotorOutput) <= ALT_DELTA);
   }
 
   @Test
@@ -178,7 +180,7 @@ public class DriveSubsystemTest {
     when(m_navx.getVelocityY()).thenReturn((float)4.106);
 
     // Fill up velocity moving average buffer by calling periodic
-    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+    for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
 
     // Try to drive with small turn value
     m_driveSubsystem.teleopPID(1.0, 0.001);
@@ -233,15 +235,15 @@ public class DriveSubsystemTest {
     when(m_navx.getVelocityY()).thenReturn((float)0.0);
 
     // Fill up velocity moving average buffer by calling periodic
-    for (int i = 0; i < 60; i++) { m_driveSubsystem.periodic(); }
+    for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
 
     // Try to move forward
     m_driveSubsystem.teleopPID(1.0, 0.0);
 
     // Verify that left and right motors are being driven with expected values
-    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.09), AdditionalMatchers.gt(0.0)), 
+    verify(m_lMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.13), AdditionalMatchers.gt(0.0)), 
                                           ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
-    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.09), AdditionalMatchers.gt(0.0)), 
+    verify(m_rMasterMotor, times(1)).set(ArgumentMatchers.eq(ControlMode.PercentOutput), AdditionalMatchers.and(AdditionalMatchers.lt(0.13), AdditionalMatchers.gt(0.0)), 
                                           ArgumentMatchers.eq(DemandType.ArbitraryFeedForward), AdditionalMatchers.eq(0.0, DELTA));
   }
 

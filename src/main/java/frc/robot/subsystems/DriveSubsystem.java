@@ -85,15 +85,14 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double METERS_PER_ROTATION = METERS_PER_TICK * TICKS_PER_ROTATION; //0.04388
   private final double DRIVETRAIN_EFFICIENCY = 0.88;
   private final double MAX_LINEAR_SPEED = Math.floor(((MOTOR_MAX_RPM / 60) * METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY) * 1000) / 1000; //4.106 m/s
-  private final double WHEEL_SLIP_LIMIT = 0.08;
   private final double INERTIAL_VELOCITY_THRESHOLD = 0.005;
-  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 30;
+  private final int INERTIAL_VELOCITY_WINDOW_SIZE = 1;
   private final double[] INERTIAL_VELOCITY_READINGS = new double[INERTIAL_VELOCITY_WINDOW_SIZE];
 
   private final double TOLERANCE = 0.125;
 
   private double m_turnScalar = 1.0; 
-  private double m_output = 0.0;
+  private double m_accelerationLimit = 0.0;
   private double m_inertialVelocity = 0.0;
   private double m_inertialVelocitySum = 0.0;
   private int m_inertialVelocityIndex = 0;
@@ -116,12 +115,12 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param kD Derivative gain
    * @param period Time (in seconds) between PID calculations
    * @param tolerance Allowed closed loop error (degrees)
-   * @param turn_scalar Turn sensitivity
-   * @param deadband Deadzone for joystick
+   * @param turn_scalar Scalar for turn input (degrees)
+   * @param accelerationLimit Maximum allowed acceleration (m/s^2)
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    * @param throttleInputCurve Expression characterising throttle input with "X" as the variable
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, String tractionControlCurve, String throttleInputCurve) {
+  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
       // The PIDController used by the subsystem
       m_drivePIDController = new PIDController(kP, 0, kD, Constants.ROBOT_LOOP_PERIOD);
 
@@ -134,6 +133,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       this.m_navx = drivetrainHardware.navx;
 
       this.m_turnScalar = turn_scalar;
+      this.m_accelerationLimit = accelerationLimit;
 
       // Reset TalonFX settings
       m_lMasterMotor.configFactoryDefault();
@@ -168,13 +168,15 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
       // Fill traction control hashmap
       int maxSpeedCount = (int)(MAX_LINEAR_SPEED * 1000.0);
-      for (int i = -maxSpeedCount; i <= maxSpeedCount; i++) {
+      for (int i = 0; i <= maxSpeedCount; i++) {
         double key = (double)i / 1000;
         try {
-          // Evaluate JavaScript, replacing "X" with value and clamp value between [-1.0, +1.0]
+          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, +1.0]
           double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
-          value = MathUtil.clamp(value, -1.0, +1.0);
-          m_tractionControlMap.put(key, value);
+          value = MathUtil.clamp(value, 0.0, +1.0);
+          // Add both positive and negative values to map
+          m_tractionControlMap.put(+key, +value);
+          m_tractionControlMap.put(-key, -value);
         } catch (ScriptException e) {
           DriverStation.reportError(e.getMessage(), true);
         }
@@ -184,10 +186,12 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       for (int i = 0; i <= 1000; i++) {
         double key = (double)i / 1000;
         try {
-          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, MAX_LINEAR_SPEED]
+          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, +MAX_LINEAR_SPEED]
           double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(key))).toString());
-          value = MathUtil.clamp(value, 0.0, MAX_LINEAR_SPEED);
-          m_throttleInputMap.put(key, value);
+          value = MathUtil.clamp(value, 0.0, +MAX_LINEAR_SPEED);
+          // Add both positive and negative values to map
+          m_throttleInputMap.put(+key, +value);
+          m_throttleInputMap.put(-key, -value);
         } catch (ScriptException e) {
           DriverStation.reportError(e.getMessage(), true);
         }
@@ -230,7 +234,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   public void shuffleboard() {
     ShuffleboardTab tab = Shuffleboard.getTab(SUBSYSTEM_NAME);
     tab.addNumber("Drive Angle", () -> getHeading());
-    tab.addNumber("Drive PID Output", () -> m_output);
     tab.addNumber("Distance", () -> getLIDAR());
   }
 
@@ -270,7 +273,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Set drive speed if it is more than the deadband
     speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest) + 0.0;
-    double requestedLinearSpeed = Math.copySign(m_throttleInputMap.get(Math.abs(speedRequest)), speedRequest);
+    double requestedLinearSpeed = m_throttleInputMap.get(speedRequest);
 
     // Start turning if input is greater than deadband
     if (Math.abs(turnRequest) >= TURN_DEADBAND) {
@@ -293,16 +296,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Get requested acceleration with minimum of 1 cm/sec^2
     double requestedAcceleration = requestedLinearSpeed - inertialVelocity;
     requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration) * 100) / 100, requestedAcceleration);
-    int isAccelerating = (requestedAcceleration != 0.0) ? 1 : 0;
 
-    // Apply slip limit to requested acceleration to limit wheel slip
-    requestedAcceleration = Math.copySign(
-                                            Math.max(
-                                              Math.abs(requestedAcceleration * WHEEL_SLIP_LIMIT), 
-                                              Math.abs(inertialVelocity * WHEEL_SLIP_LIMIT * isAccelerating)
-                                            ), 
-                                            requestedAcceleration
-                                          );
+    // Apply acceleration limit to requested acceleration to limit wheel slip
+    requestedAcceleration = Math.copySign(Math.min(Math.abs(requestedAcceleration), m_accelerationLimit), requestedAcceleration);
 
     // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
     double velocityLookup = inertialVelocity + requestedAcceleration;

@@ -269,7 +269,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double currentAngle = getAngle();
 
     // Set drive speed if it is more than the deadband
-    speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest);
+    speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest) + 0.0;
     double requestedLinearSpeed = Math.copySign(m_throttleInputMap.get(Math.abs(speedRequest)), speedRequest);
 
     // Start turning if input is greater than deadband
@@ -303,10 +303,10 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
                                             ), 
                                             requestedAcceleration
                                           );
-    
+
     // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
     double velocityLookup = inertialVelocity + requestedAcceleration;
-    velocityLookup = Math.copySign(Math.floor(Math.abs(velocityLookup) * 1000) / 1000, velocityLookup);
+    velocityLookup = Math.copySign(Math.floor(Math.abs(velocityLookup) * 1000) / 1000, velocityLookup) + 0.0;
     velocityLookup = MathUtil.clamp(velocityLookup, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
 
     // Lookup optimal motor speed output

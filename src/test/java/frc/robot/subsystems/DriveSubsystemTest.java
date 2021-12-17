@@ -131,7 +131,7 @@ public class DriveSubsystemTest {
     for (int i = 0; i < 90; i++) {
       velocity = (velocity <= -2.053) ?
                   -2.053 :
-                  velocity - 0.08;
+                  velocity - 0.05;
       when(m_navx.getVelocityY()).thenReturn((float)velocity);
 
       // Try to reverse direction

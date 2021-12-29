@@ -9,10 +9,6 @@ package frc.robot.subsystems;
 
 import java.util.HashMap;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -21,7 +17,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -30,9 +25,11 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.Constants;
+import frc.robot.TractionControlController;
 
 
 public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
@@ -63,6 +60,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private String SUBSYSTEM_NAME = "Drive Subsystem";
 
   private PIDController m_drivePIDController;
+  private TractionControlController m_tractionControlController;
 
   private WPI_TalonFX m_lMasterMotor;
   private WPI_TalonFX m_lSlaveMotor;
@@ -92,15 +90,11 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double TOLERANCE = 0.125;
 
   private double m_turnScalar = 1.0; 
-  private double m_accelerationLimit = 0.0;
   private double m_inertialVelocity = 0.0;
   private double m_inertialVelocitySum = 0.0;
   private int m_inertialVelocityIndex = 0;
 
   private boolean m_wasTurning = false;
-
-  private HashMap<Double, Double> m_tractionControlMap = new HashMap<Double, Double>();
-  private HashMap<Double, Double> m_throttleInputMap = new HashMap<Double, Double>();
 
   //Odometry class for tracking robot pose
   private final DifferentialDriveOdometry m_odometry;
@@ -121,8 +115,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param throttleInputCurve Expression characterising throttle input with "X" as the variable
    */
   public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
-      // The PIDController used by the subsystem
       m_drivePIDController = new PIDController(kP, 0, kD, Constants.ROBOT_LOOP_PERIOD);
+      m_tractionControlController = new TractionControlController(MAX_LINEAR_SPEED, accelerationLimit, tractionControlCurve, throttleInputCurve);
 
       this.m_lMasterMotor = drivetrainHardware.lMasterMotor;
       this.m_rMasterMotor = drivetrainHardware.rMasterMotor;
@@ -133,7 +127,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       this.m_navx = drivetrainHardware.navx;
 
       this.m_turnScalar = turn_scalar;
-      this.m_accelerationLimit = accelerationLimit;
 
       // Reset TalonFX settings
       m_lMasterMotor.configFactoryDefault();
@@ -162,40 +155,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       // Make motors use integrated encoder
       m_lMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
       m_rMasterMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-
-      // Get Mozilla Rhino JavaScript engine
-      ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("rhino");
-
-      // Fill traction control hashmap
-      int maxSpeedCount = (int)(MAX_LINEAR_SPEED * 1000.0);
-      for (int i = 0; i <= maxSpeedCount; i++) {
-        double key = (double)i / 1000;
-        try {
-          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, +1.0]
-          double value = Double.valueOf(jsEngine.eval(tractionControlCurve.replace("X", String.valueOf(key))).toString());
-          value = MathUtil.clamp(value, 0.0, +1.0);
-          // Add both positive and negative values to map
-          m_tractionControlMap.put(+key, +value);
-          m_tractionControlMap.put(-key, -value);
-        } catch (ScriptException e) {
-          DriverStation.reportError(e.getMessage(), true);
-        }
-      }
-
-      // Fill throttle input hashmap
-      for (int i = 0; i <= 1000; i++) {
-        double key = (double)i / 1000;
-        try {
-          // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, +MAX_LINEAR_SPEED]
-          double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(key))).toString());
-          value = MathUtil.clamp(value, 0.0, +MAX_LINEAR_SPEED);
-          // Add both positive and negative values to map
-          m_throttleInputMap.put(+key, +value);
-          m_throttleInputMap.put(-key, -value);
-        } catch (ScriptException e) {
-          DriverStation.reportError(e.getMessage(), true);
-        }
-      }
 
       // Initialise PID subsystem setpoint and input
       resetAngle();
@@ -239,6 +198,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void periodic() {
+    // Display traction control indicator on SmartDashboard
+    SmartDashboard.putBoolean("TC", m_tractionControlController.isEnabled());
+
     updateInertialVelocity();
     
     // Update the odometry in the periodic block
@@ -266,14 +228,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * Call this repeatedly to drive using PID during teleoperation
    * @param speedRequest Desired speed from -1.0 to 1.0
    * @param turnRequest Turn input from -1.0 to 1.0
-   * @param power exponent for drive response curve. 1 is linear response
    */
   public void teleopPID(double speedRequest, double turnRequest) {
     double currentAngle = getAngle();
-
-    // Set drive speed if it is more than the deadband
-    speedRequest = Math.copySign(Math.floor(Math.abs(speedRequest) * 1000) / 1000, speedRequest) + 0.0;
-    double requestedLinearSpeed = m_throttleInputMap.get(speedRequest);
 
     // Start turning if input is greater than deadband
     if (Math.abs(turnRequest) >= TURN_DEADBAND) {
@@ -291,22 +248,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Calculate next PID turn output
     double turnOutput = m_drivePIDController.calculate(currentAngle);
 
-    double inertialVelocity = getInertialVelocity();
-
-    // Get requested acceleration with minimum of 1 cm/sec^2
-    double requestedAcceleration = requestedLinearSpeed - inertialVelocity;
-    requestedAcceleration = Math.copySign(Math.floor(Math.abs(requestedAcceleration) * 100) / 100, requestedAcceleration);
-
-    // Apply acceleration limit to requested acceleration to limit wheel slip
-    requestedAcceleration = Math.copySign(Math.min(Math.abs(requestedAcceleration), m_accelerationLimit), requestedAcceleration);
-
-    // Calculate optimal velocity and truncate value to 3 decimal places and clamp to maximum linear speed
-    double velocityLookup = inertialVelocity + requestedAcceleration;
-    velocityLookup = Math.copySign(Math.floor(Math.abs(velocityLookup) * 1000) / 1000, velocityLookup) + 0.0;
-    velocityLookup = MathUtil.clamp(velocityLookup, -MAX_LINEAR_SPEED, +MAX_LINEAR_SPEED);
-
-    // Lookup optimal motor speed output
-    double optimalSpeedOutput = m_tractionControlMap.get(velocityLookup);
+    // Calculate next motor speed output
+    double optimalSpeedOutput = m_tractionControlController.calculate(getInertialVelocity(), speedRequest);
 
     // Run motors with appropriate values
     m_lMasterMotor.set(ControlMode.PercentOutput, optimalSpeedOutput, DemandType.ArbitraryFeedForward, -turnOutput);
@@ -486,6 +429,27 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   public void stop() {
     m_lMasterMotor.set(ControlMode.PercentOutput, 0.0);
     m_rMasterMotor.set(ControlMode.PercentOutput, 0.0);
+  }
+
+  /**
+   * Toggle traction control
+   */
+  public void toggleTractionControl() {
+    m_tractionControlController.toggle();
+  }
+
+  /**
+   * Disable traction control
+   */
+  public void disableTractionControl() {
+    m_tractionControlController.disable();
+  }
+
+  /**
+   * Enable traction control
+   */
+  public void enableTractionControl() {
+    m_tractionControlController.enable();
   }
 
   /**

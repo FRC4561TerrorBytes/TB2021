@@ -7,8 +7,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.HashMap;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -107,8 +105,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param drivetrainHardware Hardware devices required by drivetrain
    * @param kP Proportional gain
    * @param kD Derivative gain
-   * @param period Time (in seconds) between PID calculations
-   * @param tolerance Allowed closed loop error (degrees)
    * @param turn_scalar Scalar for turn input (degrees)
    * @param accelerationLimit Maximum allowed acceleration (m/s^2)
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable

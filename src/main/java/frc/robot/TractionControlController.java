@@ -68,7 +68,7 @@ public class TractionControlController {
   /**
    * Returns the next output of the traction control controller
    * @param inertialVelocity Current inertial velocity
-   * @param speedRequest Speed request [0.0, +1.0]
+   * @param speedRequest Speed request [-1.0, +1.0]
    * @return Optimal motor speed output [-1.0, +1.0]
    */
   public double calculate(double inertialVelocity, double speedRequest) {

@@ -7,12 +7,11 @@
 
 package frc.robot;
 
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.cscore.VideoException;
-import edu.wpi.cscore.VideoSource;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoException;
+import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
@@ -204,12 +203,12 @@ public class RobotContainer {
     //   .whenReleased(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(Constants.MOTOR_STOP), CLIMBER_SUBSYSTEM));;
 
     // Controller turret left, trigger left
-    new Trigger(() -> (XBOX_CONTROLLER.getTriggerAxis(Hand.kLeft) > Constants.DEADBAND))
-      .whenActive(new MoveTurretManualCommand(SHOOTER_SUBSYSTEM, () -> -XBOX_CONTROLLER.getTriggerAxis(Hand.kLeft) * 25));
+    new Trigger(() -> (XBOX_CONTROLLER.getLeftTriggerAxis() > Constants.DEADBAND))
+      .whenActive(new MoveTurretManualCommand(SHOOTER_SUBSYSTEM, () -> -XBOX_CONTROLLER.getLeftTriggerAxis() * 25));
     
     // Controller turret right, trigger right
-    new Trigger(() -> (XBOX_CONTROLLER.getTriggerAxis(Hand.kRight) > Constants.DEADBAND))
-      .whenActive(new MoveTurretManualCommand(SHOOTER_SUBSYSTEM, () -> XBOX_CONTROLLER.getTriggerAxis(Hand.kRight) * 25));
+    new Trigger(() -> (XBOX_CONTROLLER.getRightTriggerAxis() > Constants.DEADBAND))
+      .whenActive(new MoveTurretManualCommand(SHOOTER_SUBSYSTEM, () -> XBOX_CONTROLLER.getRightTriggerAxis() * 25));
       
   }
 
@@ -262,7 +261,7 @@ public class RobotContainer {
     try {
 
       // Intake
-      camera1 = CameraServer.getInstance().startAutomaticCapture();
+      camera1 = CameraServer.startAutomaticCapture();
       camera1.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
       camera1.setResolution(176, 144);
       camera1.setFPS(15); // Can go up to 30
@@ -271,7 +270,7 @@ public class RobotContainer {
       camera1.setWhiteBalanceManual(10);
       
       // Shooter
-      camera2 = CameraServer.getInstance().startAutomaticCapture();
+      camera2 = CameraServer.startAutomaticCapture();
       camera2.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
       camera2.setResolution(176, 144);
       camera2.setFPS(15); // Can go up to 30

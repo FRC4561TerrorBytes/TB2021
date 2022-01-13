@@ -21,7 +21,7 @@ import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpiutil.math.MathUtil;
+import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants;
 import frc.robot.TalonPIDConfig;
 import frc.robot.VisionData;

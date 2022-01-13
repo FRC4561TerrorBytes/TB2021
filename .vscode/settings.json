@@ -1,17 +1,6 @@
 {
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
-  "java.test.config": [
-    {
-        "name": "WPIlibUnitTests",
-        "workingDirectory": "${workspaceFolder}/build/tmp/jniExtractDir",
-        "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/tmp/jniExtractDir" ],
-        "env": { "LD_LIBRARY_PATH": "${workspaceFolder}/build/tmp/jniExtractDir" ,
-          "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/tmp/jniExtractDir" }
-        
-    },
-  ],
-  "java.test.defaultConfig": "WPIlibUnitTests",
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
@@ -25,5 +14,16 @@
     "**/.factorypath": true,
     "**/*~": true
   },
-  "C_Cpp.intelliSenseEngineFallback": "Enabled"
+  "java.test.config": [
+    {
+      "name": "WPIlibUnitTests",
+      "workingDirectory": "${workspaceFolder}/build/jni/release",
+      "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/jni/release" ],
+      "env": {
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release" ,
+        "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
+      }
+    },
+  ],
+  "java.test.defaultConfig": "WPIlibUnitTests"
 }

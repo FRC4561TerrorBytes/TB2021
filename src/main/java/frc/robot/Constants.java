@@ -78,9 +78,9 @@ public final class Constants {
 
 
     // Shooter PID Values
-    private static final double FLYWHEEL_kP = 1.15;
-    private static final double FLYWHEEL_kI = 0.98;
-    private static final double FLYWHEEL_kD = 0.11;
+    private static final double FLYWHEEL_kP = 0.8;
+    private static final double FLYWHEEL_kI = 0.0;
+    private static final double FLYWHEEL_kD = 0.1;
     private static final double FLYWHEEL_TOLERANCE = 100;
     private static final double FLYWHEEL_MAX_RPM = FALCON_500_MAX_RPM;
     private static final double FLYWHEEL_TICKS_PER_ROTATION = CTRE_TALONFX_ENCODER_TICKS_PER_ROTATION;

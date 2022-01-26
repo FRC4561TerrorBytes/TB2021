@@ -88,6 +88,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private final double TOLERANCE = 0.125;
 
   private double m_turnScalar = 1.0; 
+  private double m_deadband = 0.0;
   private double m_inertialVelocity = 0.0;
   private double m_inertialVelocitySum = 0.0;
   private int m_inertialVelocityIndex = 0;
@@ -110,9 +111,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    * @param throttleInputCurve Expression characterising throttle input with "X" as the variable
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
+  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, double deadband, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
       m_drivePIDController = new PIDController(kP, 0, kD, Constants.ROBOT_LOOP_PERIOD);
-      m_tractionControlController = new TractionControlController(MAX_LINEAR_SPEED, accelerationLimit, tractionControlCurve, throttleInputCurve);
+      m_tractionControlController = new TractionControlController(deadband, MAX_LINEAR_SPEED, accelerationLimit, tractionControlCurve, throttleInputCurve);
 
       this.m_lMasterMotor = drivetrainHardware.lMasterMotor;
       this.m_rMasterMotor = drivetrainHardware.rMasterMotor;
@@ -123,6 +124,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
       this.m_navx = drivetrainHardware.navx;
 
       this.m_turnScalar = turn_scalar;
+      this.m_deadband = deadband;
 
       // Reset TalonFX settings
       m_lMasterMotor.configFactoryDefault();
@@ -229,7 +231,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     double currentAngle = getAngle();
 
     // Start turning if input is greater than deadband
-    if (Math.abs(turnRequest) >= TURN_DEADBAND) {
+    if (Math.abs(turnRequest) >= m_deadband) {
       // Add delta to setpoint scaled by factor
       m_drivePIDController.setSetpoint(currentAngle + (turnRequest * m_turnScalar));
       m_wasTurning = true;

@@ -10,7 +10,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.MathUtil;
 
 public class TractionControlController {
+  private final double MIN_DEADBAND = 0.001;
+  private final double MAX_DEADBAND = 0.05;
+  
   private boolean m_isEnabled = true;
+  private double m_deadband = 0.0;
   private double m_maxLinearSpeed = 0.0;
   private double m_accelerationLimit = 0.0;
   private double m_originalAccelerationLimit = 0.0;
@@ -25,7 +29,8 @@ public class TractionControlController {
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    * @param throttleInputCurve Expression characterising throttle input with "X" as the variable
    */
-  public TractionControlController(double maxLinearSpeed, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
+  public TractionControlController(double deadband, double maxLinearSpeed, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
+    m_deadband = MathUtil.clamp(deadband, MIN_DEADBAND, MAX_DEADBAND);
     m_maxLinearSpeed = maxLinearSpeed;
     m_accelerationLimit = accelerationLimit;
     m_originalAccelerationLimit = accelerationLimit;
@@ -53,8 +58,9 @@ public class TractionControlController {
     for (int i = 0; i <= 1000; i++) {
       double key = (double)i / 1000;
       try {
+        double deadbandKey = MathUtil.applyDeadband(key, m_deadband);
         // Evaluate JavaScript, replacing "X" with value and clamp value between [0.0, +MAX_LINEAR_SPEED]
-        double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(key))).toString());
+        double value = Double.valueOf(jsEngine.eval(throttleInputCurve.replace("X", String.valueOf(deadbandKey))).toString());
         value = MathUtil.clamp(value, 0.0, +maxLinearSpeed);
         // Add both positive and negative values to map
         m_throttleInputMap.put(+key, +value);

@@ -54,7 +54,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(), Constants.DRIVE_kP, Constants.DRIVE_kD, 
-    Constants.DRIVE_TURN_SCALAR, Constants.DRIVE_ACCELERATION_LIMIT, Constants.DRIVE_TRACTION_CONTROL_CURVE, Constants.DRIVE_THROTTLE_INPUT_CURVE);
+    Constants.DRIVE_TURN_SCALAR, Constants.CONTROLLER_DEADBAND, Constants.DRIVE_ACCELERATION_LIMIT, Constants.DRIVE_TRACTION_CONTROL_CURVE, Constants.DRIVE_THROTTLE_INPUT_CURVE);
   private static final ClimberSubsystem CLIMBER_SUBSYSTEM = new ClimberSubsystem();
 
   public static final MagazineSubsystem MAGAZINE_SUBSYSTEM = new MagazineSubsystem(MagazineSubsystem.initializeHardware(), Constants.ARM_CONFIG);
@@ -91,7 +91,7 @@ public class RobotContainer {
     initializeCamera();
 
     // Set default commands for subsystems
-    DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(LEFT_JOYSTICK.getY(), RIGHT_JOYSTICK.getX()), DRIVE_SUBSYSTEM));
+    DRIVE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> DRIVE_SUBSYSTEM.teleopPID(XBOX_CONTROLLER.getLeftY(), XBOX_CONTROLLER.getRightX()), DRIVE_SUBSYSTEM));
     // MAGAZINE_SUBSYSTEM.setDefaultCommand(new RunCommand(() -> MAGAZINE_SUBSYSTEM.ballUptake(), MAGAZINE_SUBSYSTEM));
 
     //Create Auto Mode Selection
@@ -203,11 +203,11 @@ public class RobotContainer {
     //   .whenReleased(new RunCommand(() -> CLIMBER_SUBSYSTEM.mouseDroidManual(Constants.MOTOR_STOP), CLIMBER_SUBSYSTEM));;
 
     // Controller turret left, trigger left
-    new Trigger(() -> (XBOX_CONTROLLER.getLeftTriggerAxis() > Constants.DEADBAND))
+    new Trigger(() -> (XBOX_CONTROLLER.getLeftTriggerAxis() > Constants.CONTROLLER_DEADBAND))
       .whenActive(new MoveTurretManualCommand(SHOOTER_SUBSYSTEM, () -> -XBOX_CONTROLLER.getLeftTriggerAxis() * 25));
     
     // Controller turret right, trigger right
-    new Trigger(() -> (XBOX_CONTROLLER.getRightTriggerAxis() > Constants.DEADBAND))
+    new Trigger(() -> (XBOX_CONTROLLER.getRightTriggerAxis() > Constants.CONTROLLER_DEADBAND))
       .whenActive(new MoveTurretManualCommand(SHOOTER_SUBSYSTEM, () -> XBOX_CONTROLLER.getRightTriggerAxis() * 25));
       
   }

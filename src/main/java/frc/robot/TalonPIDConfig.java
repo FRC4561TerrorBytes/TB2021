@@ -12,10 +12,13 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.can.BaseTalon;
 
+import edu.wpi.first.math.MathUtil;
+
 /** 
  * Automates the configuration of Talon PID and MotionMagic parameters
  */
 public class TalonPIDConfig {
+  private static final double MECHANICAL_EFFICIENCY = 0.9;
   private static final double MIN_TOLERANCE = 1.0;
   private static final int MIN_MOTION_SMOOTHING = 0;
   private static final int MAX_MOTION_SMOOTHING = 7;
@@ -60,12 +63,12 @@ public class TalonPIDConfig {
                   double tolerance) {
     this.m_sensorPhase = sensorPhase;
     this.m_invertMotor = invertMotor;
-    this.m_maxRPM = maxRPM;
+    this.m_maxRPM = maxRPM * MECHANICAL_EFFICIENCY;
     this.m_ticksPerRotation = ticksPerRotation;
     this.m_kP = kP;
     this.m_kI = kI;
     this.m_kD = kD;
-    this.m_tolerance = tolerance;
+    this.m_tolerance = Math.max(tolerance, MIN_TOLERANCE);
 
     this.m_enableSoftLimits = false;
 
@@ -96,23 +99,18 @@ public class TalonPIDConfig {
     this.m_sensorPhase = sensorPhase;
     this.m_invertMotor = invertMotor;
     this.m_ticksPerRotation = ticksPerRotation;
-    this.m_maxRPM = maxRPM;
+    this.m_maxRPM = maxRPM * MECHANICAL_EFFICIENCY;
     this.m_kP = kP;
     this.m_kI = kI;
     this.m_kD = kD;
-    this.m_tolerance = tolerance;
+    this.m_tolerance = Math.max(tolerance, MIN_TOLERANCE);
     this.m_lowerLimit = lowerLimit;
     this.m_upperLimit = upperLimit;
     this.m_enableSoftLimits = enableSoftLimits;
     
     this.m_velocityRPM = velocityRPM;
     this.m_accelerationRPMPerSec = accelerationRPMPerSec;
-    this.m_motionSmoothing = motionSmoothing;
-
-    if (this.m_tolerance < MIN_TOLERANCE) this.m_tolerance = MIN_TOLERANCE;
-
-    if (this.m_motionSmoothing < MIN_MOTION_SMOOTHING) this.m_motionSmoothing = MIN_MOTION_SMOOTHING;
-    if (this.m_motionSmoothing > MAX_MOTION_SMOOTHING) this.m_motionSmoothing = MAX_MOTION_SMOOTHING;
+    this.m_motionSmoothing = MathUtil.clamp(motionSmoothing, MIN_MOTION_SMOOTHING, MAX_MOTION_SMOOTHING);
 
     this.m_motionMagic = true;
   }
@@ -163,9 +161,23 @@ public class TalonPIDConfig {
       talon.configMotionSCurveStrength(m_motionSmoothing);
     } 
   }
-
-  private double rpmToTicksPer100ms(double rpm) {
+  
+  /**
+   * Convert RPM to ticks per 100ms
+   * @param rpm RPM
+   * @return Value in ticks per 100ms
+   */
+  public double rpmToTicksPer100ms(double rpm) {
     return (rpm * m_ticksPerRotation) / 600;
+  }
+
+  /**
+   * Convert ticks per 100ms to RPM
+   * @param ticks Encoder ticks per 100ms
+   * @return Value in RPM
+   */
+  public double ticksPer100msToRPM(double ticks) {
+    return (ticks * 600) / m_ticksPerRotation;
   }
 
   /**

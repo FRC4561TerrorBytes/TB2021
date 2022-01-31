@@ -238,6 +238,9 @@ public class DriveSubsystemTest {
     // Fill up velocity moving average buffer by calling periodic
     for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
 
+    // Enable traction control
+    m_driveSubsystem.enableTractionControl();
+    
     // Try to move forward
     m_driveSubsystem.teleopPID(1.0, 0.0);
 
@@ -258,6 +261,9 @@ public class DriveSubsystemTest {
 
     // Fill up velocity moving average buffer by calling periodic
     for (int i = 0; i < 6; i++) { m_driveSubsystem.periodic(); }
+
+    // Enable traction control
+    m_driveSubsystem.enableTractionControl();
 
     // Toggle off traction control
     m_driveSubsystem.toggleTractionControl();

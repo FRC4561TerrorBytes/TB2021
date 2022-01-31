@@ -69,6 +69,8 @@ public class TractionControlController {
         DriverStation.reportError(e.getMessage(), true);
       }
     }
+
+    disable();
   }
 
   /**

@@ -54,7 +54,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(), Constants.DRIVE_kP, Constants.DRIVE_kD, 
-    Constants.DRIVE_TURN_SCALAR, Constants.CONTROLLER_DEADBAND, Constants.DRIVE_ACCELERATION_LIMIT, Constants.DRIVE_TRACTION_CONTROL_CURVE, Constants.DRIVE_THROTTLE_INPUT_CURVE);
+    Constants.DRIVE_TURN_SCALAR, Constants.CONTROLLER_DEADBAND, Constants.DRIVE_SLIP_RATIO_LIMIT, Constants.DRIVE_TRACTION_CONTROL_CURVE, Constants.DRIVE_THROTTLE_INPUT_CURVE);
   private static final ClimberSubsystem CLIMBER_SUBSYSTEM = new ClimberSubsystem();
 
   public static final MagazineSubsystem MAGAZINE_SUBSYSTEM = new MagazineSubsystem(MagazineSubsystem.initializeHardware(), Constants.ARM_CONFIG);

@@ -107,13 +107,14 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * @param kP Proportional gain
    * @param kD Derivative gain
    * @param turn_scalar Scalar for turn input (degrees)
-   * @param accelerationLimit Maximum allowed acceleration (m/s^2)
+   * @param deadband Deadband for controller input [+0.001, +0.05]
+   * @param slipRatioLimit Maximum allowed slip (%) [+0.001, +1.0]
    * @param tractionControlCurve Expression characterising traction of the robot with "X" as the variable
    * @param throttleInputCurve Expression characterising throttle input with "X" as the variable
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, double deadband, double accelerationLimit, String tractionControlCurve, String throttleInputCurve) {
+  public DriveSubsystem(Hardware drivetrainHardware, double kP, double kD, double turn_scalar, double deadband, double slipRatioLimit, String tractionControlCurve, String throttleInputCurve) {
       m_drivePIDController = new PIDController(kP, 0, kD, Constants.ROBOT_LOOP_PERIOD);
-      m_tractionControlController = new TractionControlController(deadband, MAX_LINEAR_SPEED, accelerationLimit, tractionControlCurve, throttleInputCurve);
+      m_tractionControlController = new TractionControlController(deadband, MAX_LINEAR_SPEED, slipRatioLimit, tractionControlCurve, throttleInputCurve);
 
       this.m_lMasterMotor = drivetrainHardware.lMasterMotor;
       this.m_rMasterMotor = drivetrainHardware.rMasterMotor;
